@@ -1,0 +1,9 @@
+.idea/
+.releases/
+manual.html
+package-lock.json
+node_modules
+.nyc_output/
+coverage/
+coverage.lcov
+*.min.css

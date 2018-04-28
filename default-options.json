@@ -1,0 +1,56 @@
+{
+  "events": [
+    {
+      "type": 4,
+      "button": 0,
+      "buttonsDown": 2,
+      "command": "switchToNextTab"
+    },
+    {
+      "type": 3,
+      "button": 0,
+      "buttonsDown": 2,
+      "command": "switchToPreviousTab"
+    },
+    {
+      "type": 4,
+      "button": 0,
+      "buttonsDown": 1,
+      "command": "decreaseZoom"
+    },
+    {
+      "type": 3,
+      "button": 0,
+      "buttonsDown": 1,
+      "command": "increaseZoom"
+    },
+    {
+      "type": 1,
+      "button": 1,
+      "buttonsDown": 5,
+      "command": "resetZoom"
+    },
+    {
+      "type": 2,
+      "button": 1,
+      "buttonsDown": 2,
+      "command": "closeCurrentTab"
+    },
+    {
+      "type": 5,
+      "button": 1,
+      "buttonsDown": 6,
+      "command": "restoreClosedTab"
+    }
+  ],
+  "sequences": [
+    {
+      "sequence": "21222122",
+      "command": "findSelectedText"
+    },
+    {
+      "sequence": "21222125",
+      "command": "toggleBookmark"
+    }
+  ]
+}

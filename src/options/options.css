@@ -1,0 +1,68 @@
+[id^=model_] {
+    display: none;
+}
+
+td, th {
+    padding-right: 2em;
+}
+
+.events td:first-child, .events th:first-child {
+    padding: 0;
+}
+
+#sequences td:first-child {
+    width: 100%;
+}
+
+.buttons_down > label {
+    display: inline-flex;
+    align-content: center;
+    justify-content: center;
+    vertical-align: middle;
+}
+
+.remove {
+    cursor: pointer;
+}
+
+.remove:hover {
+    color: red;
+}
+
+.primary {
+    max-width: 10em !important;
+    text-align: center;
+    cursor: pointer;
+    margin-left: 12px;
+}
+
+.test_area {
+    border: 3px dashed #767676;
+    border-radius: 2px;
+    background: rgba(147, 128, 108, 0.1);
+    color: #767676;
+    width: 100%;
+    height: 6em;
+    -moz-user-select: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin-bottom: 1em;
+    overflow: hidden;
+}
+
+.test_area > * {
+    text-align: center;
+    margin: 0;
+    vertical-align: middle;
+}
+
+.test_area:hover {
+    border-color: #151515;
+    color: #151515;
+}
+
+.test_area > .matches {
+    color: #003eaa;
+    font-weight: bold;
+}

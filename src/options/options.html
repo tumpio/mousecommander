@@ -1,0 +1,123 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="options.css">
+    <link rel="stylesheet" href="chrome://global/skin/in-content/common.css">
+    <script src="/lib/OptionsManager.js"></script>
+    <script src="/lib/i18n.js"></script>
+    <script src="/src/mouseEventTypes.js"></script>
+    <script src="/src/commands.js"></script>
+    <script src="options.js"></script>
+    <script src="/src/mouseEventProvider.js"></script>
+</head>
+<body>
+<h2 data-i18n="mouse_button_events"></h2>
+<div id="event_test_area" class="test_area">
+    <h2 data-i18n="test_button_event"></h2>
+    <p id="event_debug">&nbsp;</p>
+</div>
+<table class="events">
+    <thead>
+    <tr>
+        <th data-i18n="button"></th>
+        <th data-i18n="event"></th>
+        <th></th>
+        <th data-i18n="other_buttons_down"></th>
+        <th></th>
+        <th data-i18n="command"></th>
+    </tr>
+    </thead>
+    <tbody id="events">
+    </tbody>
+</table>
+<button id="add_new_event" data-i18n="new_event" class="primary"></button>
+<hr>
+<h2 data-i18n="event_sequences"></h2>
+<div id="sequence_record_area"  class="test_area">
+    <h2 data-i18n="record_sequence"></h2>
+    <p id="sequence_debug">&nbsp;</p>
+</div>
+<table>
+    <thead>
+    <tr>
+        <th data-i18n="sequence"></th>
+        <th></th>
+        <th data-i18n="command"></th>
+    </tr>
+    </thead>
+    <tbody id="sequences">
+    </tbody>
+</table>
+<button id="add_recorded_sequence" data-i18n="add_recorded_sequence" class="primary"></button>
+<table id="model_s">
+    <tr id="model_event">
+        <td>
+            <select class="button">
+                <option value="0" data-i18n="primary_button"></option>
+                <option value="1" data-i18n="middle_button"></option>
+                <option value="2" data-i18n="secondary_button"></option>
+                <option value="-1" data-i18n="wheel" hidden></option>
+            </select>
+        </td>
+        <td>
+            <select class="type">
+                <option value="1" data-i18n="button_down"></option>
+                <option value="2" data-i18n="button_up"></option>
+                <option value="3" data-i18n="wheel_up"></option>
+                <option value="4" data-i18n="wheel_down"></option>
+                <option value="5" data-i18n="long_press"></option>
+            </select>
+        </td>
+        <td>
+            <strong>+</strong>
+        </td>
+        <td>
+            <div class="buttons_down">
+                <label>
+                    <input type="checkbox" value="1">
+                    <small data-i18n="primary_button"></small>
+                </label>
+                <label>
+                    <input type="checkbox" value="4">
+                    <small data-i18n="middle_button"></small>
+                </label>
+                <label>
+                    <input type="checkbox" value="2">
+                    <small data-i18n="secondary_button"></small>
+                </label>
+            </div>
+        </td>
+        <td>
+            <strong>=</strong>
+        </td>
+        <td>
+            <select class="command">
+            </select>
+        </td>
+        <td class="remove">
+            <small>🗙</small>
+        </td>
+    </tr>
+    <tr id="model_sequence">
+        <td>
+            <div class="sequence">
+            </div>
+        </td>
+        <td>
+            <strong>=</strong>
+        </td>
+        <td>
+            <select class="command">
+            </select>
+        </td>
+        <td class="remove">
+            <small>🗙</small>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

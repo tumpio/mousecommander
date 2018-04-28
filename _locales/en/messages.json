@@ -1,0 +1,165 @@
+{
+  "extensionName": {
+    "message": "Mouse Commander"
+  },
+  "extensionDescription": {
+    "message": "An extension to do common browser actions with mouse."
+  },
+  "mouse_button_events": {
+    "message": "Mouse Button Events"
+  },
+  "event_sequences": {
+    "message": "Mouse Button Event Sequences"
+  },
+  "test_button_event": {
+    "message": "Test Event"
+  },
+  "record_sequence": {
+    "message": "Test & Record Sequence"
+  },
+  "new_event": {
+    "message": "New Event"
+  },
+  "add_recorded_sequence": {
+    "message": "Add Recorded Sequence"
+  },
+  "button": {
+    "message": "Button"
+  },
+  "event_info": {
+    "message": "$BUTTON$ $EVENT$",
+    "placeholders": {
+      "button": {
+        "content": "$1"
+      },
+      "event": {
+        "content": "$2"
+      }
+    }
+  },
+  "button_down_info": {
+    "message": "$BUTTON_DOWN$ Button Down",
+    "placeholders": {
+      "button_down": {
+        "content": "$1"
+      }
+    }
+  },
+  "buttons_down_info": {
+    "message": "$BUTTONS_DOWN$ Buttons Down",
+    "placeholders": {
+      "buttons_down": {
+        "content": "$1"
+      }
+    }
+  },
+  "button_double_click_info": {
+    "message": "Double $BUTTON$ Click",
+    "placeholders": {
+      "button": {
+        "content": "$1"
+      }
+    }
+  },
+  "button_click_info": {
+    "message": "$BUTTON$ Click",
+    "placeholders": {
+      "button": {
+        "content": "$1"
+      }
+    }
+  },
+  "wheel": {
+    "message": "Wheel"
+  },
+  "event": {
+    "message": "Event"
+  },
+  "sequence": {
+    "message": "Sequence"
+  },
+  "other_buttons_down": {
+    "message": "Other Buttons Down"
+  },
+  "command": {
+    "message": "Command"
+  },
+  "button_down": {
+    "message": "Button Down"
+  },
+  "button_up": {
+    "message": "Button Up"
+  },
+  "wheel_down": {
+    "message": "Wheel Down"
+  },
+  "wheel_up": {
+    "message": "Wheel Up"
+  },
+  "long_press": {
+    "message": "Long Press"
+  },
+  "primary_button": {
+    "message": "Primary"
+  },
+  "middle_button": {
+    "message": "Middle"
+  },
+  "secondary_button": {
+    "message": "Secondary"
+  },
+  "command_switchToNextTab": {
+    "message": "Switch to next tab"
+  },
+  "command_switchToPreviousTab": {
+    "message": "Switch to previous tab"
+  },
+  "command_closeCurrentTab": {
+    "message": "Close tab"
+  },
+  "command_closeOtherTabs": {
+    "message": "Close other tabs"
+  },
+  "command_closeTabsOnLeft": {
+    "message": "Close tabs on left"
+  },
+  "command_closeTabsOnRight": {
+    "message": "Close tabs on right"
+  },
+  "command_dublicateCurrentTab": {
+    "message": "Duplicate tab"
+  },
+  "command_reloadCurrentTab": {
+    "message": "Reload page"
+  },
+  "command_moveCurrentTabToNewWindow": {
+    "message": "Move tab to new window"
+  },
+  "command_restoreClosedTab": {
+    "message": "Restore closed tab"
+  },
+  "command_createNewTab": {
+    "message": "Create new tab"
+  },
+  "command_increaseZoom": {
+    "message": "Increase page zoom"
+  },
+  "command_decreaseZoom": {
+    "message": "Decrease page zoom"
+  },
+  "command_resetZoom": {
+    "message": "Reset page zoom"
+  },
+  "command_scrollToTop": {
+    "message": "Scroll top"
+  },
+  "command_scrollToBottom": {
+    "message": "Scroll bottom"
+  },
+  "command_findSelectedText": {
+    "message": "Highlight selected text"
+  },
+  "command_toggleBookmark": {
+    "message": "Toggle page bookmark"
+  }
+}
