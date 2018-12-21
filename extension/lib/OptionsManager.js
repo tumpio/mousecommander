@@ -50,7 +50,7 @@ OptionsManager.prototype.importOptions = function (option, optionsImport) {
 };
 
 OptionsManager.prototype.loadDefaultOptions = function () {
-    let request = new Request("/default-options.json", {
+    let request = new Request("/default_options.json", {
         method: "GET",
         headers: {
             "Content-Type": "application/json"

@@ -1,0 +1,58 @@
+{
+  "name": "mousecommander",
+  "version": "1.0.0",
+  "description": "Mouse Commander Firefox Extension",
+  "dependencies": {},
+  "devDependencies": {
+    "addons-linter": "latest",
+    "eslint": "latest",
+    "eslint-plugin-import": "latest",
+    "eslint-plugin-promise": "latest",
+    "eslint-plugin-standard": "latest",
+    "web-ext": "latest"
+},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "web-ext run --bc -s ./extension/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tumpio/mousecommander.git"
+  },
+  "author": "tumpio",
+  "license": "MPL-2.0",
+  "bugs": {
+    "url": "https://github.com/tumpio/mousecommander/issues"
+  },
+  "homepage": "https://github.com/tumpio/mousecommander#readme",
+  "eslintConfig": {
+    "extends": "eslint:recommended",
+    "env": {
+      "es6": true,
+      "browser": true,
+      "webextensions": true
+    },
+    "parserOptions": {
+      "sourceType": "module"
+    },
+    "plugins": [
+      "import",
+      "promise",
+      "standard"
+    ],
+    "rules": {
+      "indent": [
+        "warn",
+        4
+      ],
+      "quotes": [
+        "warn",
+        "double"
+      ],
+      "semi": [
+        "error",
+        "always"
+      ]
+    }
+  }
+}
