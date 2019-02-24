@@ -3,15 +3,17 @@ import struct
 import sys
 import threading
 from queue import Queue
-from typing import Callable, Any
+from typing import Any, Callable
 
-from PySide2.QtCore import Signal, QThread
-from PySide2.QtGui import QIcon
-from PySide2.QtWidgets import QMenu, QAction, QSystemTrayIcon
+from docutils.nodes import description
 from fbs_runtime.application_context import ApplicationContext, cached_property
-from pynput.mouse import Listener, Button
+from pynput.mouse import Button, Listener
+from PySide2.QtCore import Qt, QThread, Signal
+from PySide2.QtGui import QIcon
+from PySide2.QtWidgets import (QAction, QMenu, QMessageBox, QSystemTrayIcon)
 
-name = 'mouse_commander'
+name = "Mouse Commander Client"
+version = 0.1
 
 MESSAGE_QUEUE = Queue(10)
 MESSAGE_ENCODING = "utf-8"
@@ -34,6 +36,7 @@ MESSAGE_CLICK_LENGTH = struct.pack('@I', 5)
 MESSAGE_CLICK_PREFIX = bytes("c", MESSAGE_ENCODING)
 MESSAGE_SCROLL_LENGTH = struct.pack('@I', 4)
 MESSAGE_SCROLL_PREFIX = bytes("s", MESSAGE_ENCODING)
+MESSAGE_START_SIGNAL = "start_signal"
 
 
 class NativeMessageListener(threading.Thread):
@@ -44,7 +47,8 @@ class NativeMessageListener(threading.Thread):
             if not data:
                 break
             message_length = struct.unpack('@I', data)[0]
-            message = json.loads(sys.stdin.buffer.raw.read(message_length).decode(MESSAGE_ENCODING))
+            message = json.loads(sys.stdin.buffer.raw.read(
+                message_length).decode(MESSAGE_ENCODING))
             MESSAGE_QUEUE.put(message)
 
 
@@ -60,7 +64,7 @@ class NativeMessageConsumer(QThread):
             message = MESSAGE_QUEUE.get()
             if message == 0:
                 break
-            elif message == "start_signal":
+            elif message == MESSAGE_START_SIGNAL:
                 self.start_signal.emit()
 
 
@@ -73,20 +77,21 @@ class SystemTrayMenu(QMenu):
         return action
 
     @cached_property
-    def info_action(self):
-        return QAction(self.tr("Info"), self)
+    def about_action(self):
+        return QAction(self.tr("About"), self)
 
     @cached_property
     def quit_action(self):
         return QAction(self.tr("Quit"), self)
 
-    def __init__(self, action_enable: Callable[[bool], Any], action_info: callable, action_quit: callable, *__args):
+    def __init__(self, action_enable: Callable[[bool], Any], action_about: callable, action_quit: callable, *__args):
         super().__init__(*__args)
         self.addAction(self.enable_action)
-        self.addAction(self.info_action)
+        self.addAction(self.about_action)
         self.addAction(self.quit_action)
-        self.enable_action.triggered.connect(lambda: action_enable(self.enable_action.isChecked()))
-        self.info_action.triggered.connect(action_info)
+        self.enable_action.triggered.connect(
+            lambda: action_enable(self.enable_action.isChecked()))
+        self.about_action.triggered.connect(action_about)
         self.quit_action.triggered.connect(action_quit)
 
 
@@ -101,7 +106,7 @@ class AppContext(ApplicationContext):
 
     @cached_property
     def tray_menu(self):
-        return SystemTrayMenu(self.set_state, None, self.quit)
+        return SystemTrayMenu(action_enable=self.enable, action_about=self.about, action_quit=self.quit)
 
     @staticmethod
     def on_click(x, y, button, pressed):
@@ -110,7 +115,8 @@ class AppContext(ApplicationContext):
         sys.stdout.buffer.write(MESSAGE_CLICK_LENGTH)
         sys.stdout.buffer.write(MESSAGE_STRING_DELIMITER)
         sys.stdout.buffer.write(MESSAGE_CLICK_PREFIX)
-        sys.stdout.buffer.write(MESSAGE_BUTTON_DOWN if pressed else MESSAGE_BUTTON_UP)
+        sys.stdout.buffer.write(
+            MESSAGE_BUTTON_DOWN if pressed else MESSAGE_BUTTON_UP)
         sys.stdout.buffer.write(MESSAGE_BUTTON[button])
         sys.stdout.buffer.write(MESSAGE_STRING_DELIMITER)
         sys.stdout.buffer.flush()
@@ -120,7 +126,8 @@ class AppContext(ApplicationContext):
         sys.stdout.buffer.write(MESSAGE_SCROLL_LENGTH)
         sys.stdout.buffer.write(MESSAGE_STRING_DELIMITER)
         sys.stdout.buffer.write(MESSAGE_SCROLL_PREFIX)
-        sys.stdout.buffer.write(MESSAGE_SCROLL_DOWN if dy > 0 else MESSAGE_SCROLL_UP)
+        sys.stdout.buffer.write(
+            MESSAGE_SCROLL_DOWN if dy > 0 else MESSAGE_SCROLL_UP)
         sys.stdout.buffer.write(MESSAGE_STRING_DELIMITER)
         sys.stdout.buffer.flush()
 
@@ -129,6 +136,7 @@ class AppContext(ApplicationContext):
         tray = QSystemTrayIcon()
         tray.setContextMenu(self.tray_menu)
         tray.setIcon(QIcon(context.get_resource("icon.svg")))
+        tray.setToolTip(name)
         tray.setVisible(True)
         self.message_handler = NativeMessageConsumer(self.app)
         self.message_handler.start_signal.connect(self.start)
@@ -137,7 +145,7 @@ class AppContext(ApplicationContext):
         self.message_listener.start()
         return self.app.exec_()
 
-    def set_state(self, enabled: bool):
+    def enable(self, enabled: bool):
         if enabled:
             self.start()
         else:
@@ -146,7 +154,8 @@ class AppContext(ApplicationContext):
     def start(self):
         if not self.running:
             self.running = True
-            self.mouse_listener = Listener(on_click=self.on_click, on_scroll=self.on_scroll)
+            self.mouse_listener = Listener(
+                on_click=self.on_click, on_scroll=self.on_scroll)
             self.mouse_listener.start()
             self.tray_menu.enable_action.setChecked(True)
 
@@ -157,6 +166,13 @@ class AppContext(ApplicationContext):
                 self.mouse_listener = None
             self.tray_menu.enable_action.setChecked(False)
             self.running = False
+
+    def about(self):
+        QMessageBox.about(None, f"About {name}", (
+            "<p>Native client application for Mouse Commander Firefox extension.</p>"
+            f"<p>Version: {version}</p>"
+            "<p>Uses <a href='https://wiki.qt.io/Qt_for_Python'>Qt for Python</a> and <a href='https://pynput.readthedocs.io'>pynput</a>.</p>"
+            ))
 
     def quit(self):
         self.stop()

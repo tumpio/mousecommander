@@ -10,9 +10,10 @@
     "eslint-plugin-promise": "latest",
     "eslint-plugin-standard": "latest",
     "web-ext": "latest"
-},
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "cd app && pipenv run fbs freeze",
     "start": "web-ext run --bc -s ./extension/"
   },
   "repository": {
