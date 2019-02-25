@@ -1,5 +1,14 @@
+main {
+    max-width: 980px;
+    margin: auto;
+}
+
 [id^=model_] {
     display: none;
+}
+
+table {
+    width: 100%;
 }
 
 td, th {
@@ -12,6 +21,7 @@ td, th {
 
 #sequences td:first-child {
     width: 100%;
+    padding-left: 12px;
 }
 
 .buttons_down > label {

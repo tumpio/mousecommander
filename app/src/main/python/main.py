@@ -68,6 +68,45 @@ class NativeMessageConsumer(QThread):
                 self.start_signal.emit()
 
 
+class NativeMouseListener():
+
+    def __init__(self):
+        self.listener = None
+
+    def start(self):
+        self.listener = Listener(
+            on_click=self.on_click, on_scroll=self.on_scroll)
+        self.listener.start()
+
+    def stop(self):
+        if self.listener:
+            self.listener.stop()
+            self.listener = None
+
+    @staticmethod
+    def on_click(x, y, button, pressed):
+        if button not in MESSAGE_BUTTON:
+            return
+        sys.stdout.buffer.write(MESSAGE_CLICK_LENGTH)
+        sys.stdout.buffer.write(MESSAGE_STRING_DELIMITER)
+        sys.stdout.buffer.write(MESSAGE_CLICK_PREFIX)
+        sys.stdout.buffer.write(
+            MESSAGE_BUTTON_DOWN if pressed else MESSAGE_BUTTON_UP)
+        sys.stdout.buffer.write(MESSAGE_BUTTON[button])
+        sys.stdout.buffer.write(MESSAGE_STRING_DELIMITER)
+        sys.stdout.buffer.flush()
+
+    @staticmethod
+    def on_scroll(x, y, dx, dy):
+        sys.stdout.buffer.write(MESSAGE_SCROLL_LENGTH)
+        sys.stdout.buffer.write(MESSAGE_STRING_DELIMITER)
+        sys.stdout.buffer.write(MESSAGE_SCROLL_PREFIX)
+        sys.stdout.buffer.write(
+            MESSAGE_SCROLL_DOWN if dy > 0 else MESSAGE_SCROLL_UP)
+        sys.stdout.buffer.write(MESSAGE_STRING_DELIMITER)
+        sys.stdout.buffer.flush()
+
+
 class SystemTrayMenu(QMenu):
 
     @cached_property
@@ -108,29 +147,6 @@ class AppContext(ApplicationContext):
     def tray_menu(self):
         return SystemTrayMenu(action_enable=self.enable, action_about=self.about, action_quit=self.quit)
 
-    @staticmethod
-    def on_click(x, y, button, pressed):
-        if button not in MESSAGE_BUTTON:
-            return
-        sys.stdout.buffer.write(MESSAGE_CLICK_LENGTH)
-        sys.stdout.buffer.write(MESSAGE_STRING_DELIMITER)
-        sys.stdout.buffer.write(MESSAGE_CLICK_PREFIX)
-        sys.stdout.buffer.write(
-            MESSAGE_BUTTON_DOWN if pressed else MESSAGE_BUTTON_UP)
-        sys.stdout.buffer.write(MESSAGE_BUTTON[button])
-        sys.stdout.buffer.write(MESSAGE_STRING_DELIMITER)
-        sys.stdout.buffer.flush()
-
-    @staticmethod
-    def on_scroll(x, y, dx, dy):
-        sys.stdout.buffer.write(MESSAGE_SCROLL_LENGTH)
-        sys.stdout.buffer.write(MESSAGE_STRING_DELIMITER)
-        sys.stdout.buffer.write(MESSAGE_SCROLL_PREFIX)
-        sys.stdout.buffer.write(
-            MESSAGE_SCROLL_DOWN if dy > 0 else MESSAGE_SCROLL_UP)
-        sys.stdout.buffer.write(MESSAGE_STRING_DELIMITER)
-        sys.stdout.buffer.flush()
-
     def run(self):
         self.app.setQuitOnLastWindowClosed(False)
         tray = QSystemTrayIcon()
@@ -138,6 +154,7 @@ class AppContext(ApplicationContext):
         tray.setIcon(QIcon(context.get_resource("icon.svg")))
         tray.setToolTip(name)
         tray.setVisible(True)
+        self.mouse_listener = NativeMouseListener()
         self.message_handler = NativeMessageConsumer(self.app)
         self.message_handler.start_signal.connect(self.start)
         self.message_listener = NativeMessageListener(daemon=True)
@@ -154,16 +171,12 @@ class AppContext(ApplicationContext):
     def start(self):
         if not self.running:
             self.running = True
-            self.mouse_listener = Listener(
-                on_click=self.on_click, on_scroll=self.on_scroll)
             self.mouse_listener.start()
             self.tray_menu.enable_action.setChecked(True)
 
     def stop(self):
         if self.running:
-            if self.mouse_listener:
-                self.mouse_listener.stop()
-                self.mouse_listener = None
+            self.mouse_listener.stop()
             self.tray_menu.enable_action.setChecked(False)
             self.running = False
 
@@ -172,7 +185,7 @@ class AppContext(ApplicationContext):
             "<p>Native client application for Mouse Commander Firefox extension.</p>"
             f"<p>Version: {version}</p>"
             "<p>Uses <a href='https://wiki.qt.io/Qt_for_Python'>Qt for Python</a> and <a href='https://pynput.readthedocs.io'>pynput</a>.</p>"
-            ))
+        ))
 
     def quit(self):
         self.stop()

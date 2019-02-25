@@ -11,12 +11,18 @@ const SecondaryButton = Symbol("Secondary");
 
 const EventPrimaryUp = Symbol("Primary Up");
 const EventPrimaryDown = Symbol("Primary Down");
+const EventPrimaryClick = Symbol("Primary Click");
+const EventPrimaryDoubleClick = Symbol("Primary Click");
 const EventPrimaryLongPress = Symbol("Primary Long Press");
 const EventMiddleUp = Symbol("Middle Up");
 const EventMiddleDown = Symbol("Middle Down");
+const EventMiddleClick = Symbol("Middle Click");
+const EventMiddleDoubleClick = Symbol("Middle Double Click");
 const EventMiddleLongPress = Symbol("Middle Long Press");
 const EventSecondaryUp = Symbol("Secondary Up");
 const EventSecondaryDown = Symbol("Secondary Down");
+const EventSecondaryClick = Symbol("Secondary Click");
+const EventSecondaryDoubleClick = Symbol("Secondary Double Click");
 const EventSecondaryLongPress = Symbol("Secondary Long Press");
 const EventScrollUp = Symbol("Scroll Up");
 const EventScrollDown = Symbol("Scroll Down");
@@ -174,60 +180,6 @@ class SequenceBinder {
 }
 
 /*
-
-
-function isOtherButtonDown(otherButton, event) {
-    if ((event.type === MouseDown || event.type === LongPress)
-        && otherButton === ButtonDown[event.button])
-        return false;
-    return event.buttonsDown & otherButton;
-}
-
-    parseFromString(str) {
-        this.sequence = [];
-        for (let i = 0; i < str.length; i += 2) {
-            try {
-                this.sequence.push(new McMouseEvent(parseInt(str.charAt(i)), parseInt(str.charAt(i + 1))));
-            } catch (e) {
-                console.error(e);
-            }
-        }
-    }
-
-    isClick(i, button) {
-        if (i + 1 >= this.sequence.length) return false;
-        return this.sequence[i].type === MouseDown && this.sequence[i + 1].type === MouseUp
-            && this.sequence[i].button === this.sequence[i + 1].button && this.sequence[i].button === button;
-    }
-
-    translate() {
-        let translatables = [];
-        let i = 0;
-        while (i < this.sequence.length) {
-            let button = this.sequence[i].button;
-            if (this.isClick(i, button) && this.isClick(i + 2, button)) {
-                translatables.push({
-                    translate: function () {
-                        return browser.i18n.getMessage("button_double_click_info",
-                            browser.i18n.getMessage(MouseButtons[button]));
-                    }
-                });
-                i += 4;
-            } else if (this.isClick(i, button)) {
-                translatables.push({
-                    translate: function () {
-                        return browser.i18n.getMessage("button_click_info",
-                            browser.i18n.getMessage(MouseButtons[button]));
-                    }
-                });
-                i += 2;
-            } else {
-                translatables.push(this.sequence[i]);
-                i++;
-            }
-        }
-        return translatables.map(t => t.translate(false)).join(" → ");
-    }
 
 class McMouseEvent {
     constructor(button, type, buttonsDown) {

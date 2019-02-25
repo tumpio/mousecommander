@@ -136,7 +136,7 @@ function handleMouseEvent(event) {
         skipEvent = null;
     }
     if (!sequenceTimer) {
-        sequenceTimer = setTimeout(sequenceBinder.reset, 350);
+        sequenceTimer = setTimeout(sequenceBinder.reset, EVENT_SEQUENCE_TIMEOUT);
     }
     sequenceBinder.advance(event);
 }

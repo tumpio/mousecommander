@@ -15,7 +15,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "prebuild": "cp -v app/src/main/resources/base/icon.svg extension/",
     "build": "cd app && pipenv run fbs freeze",
-    "start": "web-ext run --bc -s ./extension/"
+    "start": "web-ext run --bc -s ./extension/ --url about:addons"
   },
   "repository": {
     "type": "git",

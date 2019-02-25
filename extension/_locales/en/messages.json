@@ -3,13 +3,13 @@
     "message": "Mouse Commander"
   },
   "extensionDescription": {
-    "message": "An extension to do common browser actions with mouse."
+    "message": "An extension to do common browser actions with mouse events."
   },
   "mouse_button_events": {
-    "message": "Mouse Button Events"
+    "message": "Mouse Events"
   },
   "event_sequences": {
-    "message": "Mouse Button Event Sequences"
+    "message": "Mouse Event Sequences"
   },
   "test_button_event": {
     "message": "Test Event"
@@ -53,22 +53,6 @@
       }
     }
   },
-  "button_double_click_info": {
-    "message": "Double $BUTTON$ Click",
-    "placeholders": {
-      "button": {
-        "content": "$1"
-      }
-    }
-  },
-  "button_click_info": {
-    "message": "$BUTTON$ Click",
-    "placeholders": {
-      "button": {
-        "content": "$1"
-      }
-    }
-  },
   "wheel": {
     "message": "Wheel"
   },
@@ -78,11 +62,11 @@
   "sequence": {
     "message": "Sequence"
   },
-  "other_buttons_down": {
-    "message": "Other Buttons Down"
+  "buttons_down": {
+    "message": "Buttons Down"
   },
-  "command": {
-    "message": "Command"
+  "action": {
+    "message": "Action"
   },
   "button_down": {
     "message": "Button Down"
@@ -161,5 +145,56 @@
   },
   "command_toggleBookmark": {
     "message": "Toggle page bookmark"
+  },
+  "event_primary_up": {
+    "message": "Primary button up"
+  },
+  "event_primary_down": {
+    "message": "Primary button down"
+  },
+  "event_primary_click": {
+    "message": "Primary click"
+  },
+  "event_primary_double_click": {
+    "message": "Double primary click"
+  },
+  "event_primary_long_press": {
+    "message": "Primary long press"
+  },
+  "event_middle_up": {
+    "message": "Middle button up"
+  },
+  "event_middle_down": {
+    "message": "Middle button down"
+  },
+  "event_middle_click": {
+    "message": "Middle click"
+  },
+  "event_middle_double_click": {
+    "message": "Double middle click"
+  },
+  "event_middle_long_press": {
+    "message": "Middle long press"
+  },
+  "event_secondary_up": {
+    "message": "Secondary button up"
+  },
+  "event_secondary_down": {
+    "message": "Secondary button down"
+  },
+  "event_secondary_click": {
+    "message": "Secondary click"
+  },
+  "event_secondary_double_click": {
+    "message": "Double secondary click"
+  },
+  "event_secondary_long_press": {
+    "message": "Secondary long press"
+  },
+  "event_scroll_up": {
+    "message": "Wheel up"
+  },
+  "event_scroll_down": {
+    "message": "Wheel down"
   }
 }

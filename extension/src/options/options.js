@@ -1,14 +1,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 const myOptionsManager = new OptionsManager();
-
-const MOUSE_COMMANDER_TEST_MODE = true;
-
-let nextEventToSkip;
-let resetSequenceTimer;
-let recordedSequence;
-let eventSequence = [];
 
 function createOptions(options) {
     updateEventsTable(options.events);
@@ -16,51 +10,51 @@ function createOptions(options) {
 }
 
 function updateEventsTable(events) {
-    let eventModel = document.getElementById("model_event");
-    let eventsTable = document.getElementById("events");
+    let model = document.getElementById("model_event");
+    let table = document.getElementById("events");
     for (let event of events) {
-        let option = eventModel.cloneNode(true);
-        let button = option.querySelector(".button");
+        let option = model.cloneNode(true);
 
-        function setType(type) {
-            if (type === WheelUp || type === WheelDown) {
+        option.querySelector(".button").value = event.button;
+        option.querySelector(".type").value = event.type;
+        option.querySelector(".command").value = event.command;
+
+        for (let input of option.querySelectorAll(".buttons_down input")) {
+            input.checked = event.buttonsDown.includes(input.value);
+        }
+
+        function setButtonDisabled(type) {
+            let button = option.querySelector(".button");
+            if (type === TYPE_SCROLL_UP || type === TYPE_SCROLL_DOWN) {
                 button.value = -1;
                 button.disabled = true;
             } else {
-                button.value = event.button;
                 button.disabled = false;
             }
         }
 
-        setType(event.type);
+        setButtonDisabled(event.type);
+
         option.querySelector(".type").addEventListener("change", function () {
-            let type = parseInt(this.value);
-            setType(type);
+            setButtonDisabled(this.value);
         });
-        option.querySelector(".type").value = event.type;
-        option.querySelector(".buttons_down input[value='1']").checked = isOtherButtonDown(1, event);
-        option.querySelector(".buttons_down input[value='2']").checked = isOtherButtonDown(2, event);
-        option.querySelector(".buttons_down input[value='4']").checked = isOtherButtonDown(4, event);
-        option.querySelector(".command").value = event.command;
         option.querySelector(".remove").addEventListener("click", function () {
-            eventsTable.removeChild(option);
+            table.removeChild(option);
             saveEvents();
         });
         option.removeAttribute("id");
-        eventsTable.appendChild(option);
+        table.appendChild(option);
     }
 }
 
 function updateSequencesTable(sequences) {
     let model = document.getElementById("model_sequence");
     let table = document.getElementById("sequences");
-    for (let sequence of sequences) {
+    for (let s of sequences) {
         let option = model.cloneNode(true);
-        let s = new MouseEventSequence();
-        s.parseFromString(sequence.sequence);
-        option.querySelector(".sequence").textContent = s.translate();
-        option.querySelector(".sequence").value = s.toString();
-        option.querySelector(".command").value = sequence.command;
+        option.querySelector(".sequence").textContent = translateSequence(s.sequence);
+        option.querySelector(".sequence").value = s.sequence;
+        option.querySelector(".command").value = s.command;
         option.querySelector(".remove").addEventListener("click", function () {
             table.removeChild(option);
             saveSequences();
@@ -75,9 +69,9 @@ function saveEvents() {
     let events = [];
     for (let option of options) {
         events.push({
-            "type": parseInt(option.querySelector(".type").value),
-            "button": parseInt(getButtonValue(option)),
-            "buttonsDown": getButtonsDownValue(option),
+            "type": option.querySelector(".type").value,
+            "button": option.querySelector(".button").value,
+            "buttonsDown": Array.from(option.querySelectorAll(".buttons_down input:checked")).map(input => input.value),
             "command": option.querySelector(".command").value
         });
     }
@@ -96,32 +90,7 @@ function saveSequences() {
     myOptionsManager.saveOption("sequences", sequences);
 }
 
-function getButtonValue(option) {
-    let value = option.querySelector(".button").value;
-    if (value === "-1")
-        return 0;
-    return value;
-}
-
-function getButtonsDownValue(option) {
-    let buttonsDown = 0;
-    let type = parseInt(option.querySelector(".type").value);
-    let button = parseInt(option.querySelector(".button").value);
-
-    if (option.querySelector(".buttons_down input[value='1']").checked)
-        buttonsDown += 1;
-    if (option.querySelector(".buttons_down input[value='2']").checked)
-        buttonsDown += 2;
-    if (option.querySelector(".buttons_down input[value='4']").checked)
-        buttonsDown += 4;
-
-    if (type === MouseDown || type === LongPress)
-        buttonsDown += ButtonDown[button];
-
-    return buttonsDown;
-}
-
-function fillCommands() {
+function loadCommands() {
     for (let select of document.querySelectorAll(".command")) {
         for (let command of Object.keys(commands)) {
             let option = document.createElement("option");
@@ -196,7 +165,7 @@ function recordSequence(e) {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-    fillCommands();
+    loadCommands();
     myOptionsManager.loadOptions().then(() => {
         if (!myOptionsManager.options.events) {
             myOptionsManager.loadDefaultOptions().then(createOptions);
@@ -206,9 +175,9 @@ document.addEventListener("DOMContentLoaded", function () {
     });
     document.getElementById("add_new_event").addEventListener("click", function () {
         updateEventsTable([{
-            "type": 1,
-            "button": 0,
-            "buttonsDown": 0,
+            "type": TYPE_MOUSE_DOWN,
+            "button": BUTTON_PRIMARY,
+            "buttonsDown": [],
             "command": ""
         }]);
     });
