@@ -25,6 +25,14 @@ port.onMessage.addListener(onMouseEvent);
 browser.storage.local.get().then(initOptions);
 browser.storage.onChanged.addListener(initChangedOptions);
 
+browser.windows.onFocusChanged.addListener((windowId) => {
+    if (windowId == browser.windows.WINDOW_ID_NONE) {
+        port.onMessage.removeListener(onMouseEvent);
+    } else {
+        port.onMessage.addListener(onMouseEvent);
+    }
+});
+
 function wrapReset(command) {
     return () => {
         sequenceBinder.reset();
