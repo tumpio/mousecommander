@@ -3,6 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 const myOptionsManager = new OptionsManager();
+let port;
 
 function createOptions(options) {
     updateEventsTable(options.events);
@@ -52,7 +53,7 @@ function updateSequencesTable(sequences) {
     let table = document.getElementById("sequences");
     for (let s of sequences) {
         let option = model.cloneNode(true);
-        option.querySelector(".sequence").textContent = translateSequence(s.sequence);
+        option.querySelector(".sequence").textContent = translateSequence(s.sequence.split(","));
         option.querySelector(".sequence").value = s.sequence;
         option.querySelector(".command").value = s.command;
         option.querySelector(".remove").addEventListener("click", function () {
@@ -95,73 +96,65 @@ function loadCommands() {
         for (let command of Object.keys(commands)) {
             let option = document.createElement("option");
             option.value = command;
-            option.dataset.i18n = "command_" + command;
+            option.textContent = translateCommand(command);
             select.appendChild(option);
         }
-        translateDocument(select);
     }
 }
 
-function testMouseEvent(e) {
-    let event = e.detail;
-    if (nextEventToSkip && nextEventToSkip.button === event.button && nextEventToSkip.type === event.type) {
-        nextEventToSkip = null;
-        return;
+function testMouseEvent() {
+    if (!port) {
+        let debug = document.getElementById("event_debug");
+        port = browser.runtime.connect({"name": "event"});
+        port.onMessage.addListener((message) => {
+            if (debug.classList.contains("matches"))
+                return;
+            debug.textContent = eventDebugText(message.event, message.buttonsDown, message.command);
+            if (message.command) {
+                setMatches(debug);
+            }
+        });
     }
-    let debug = document.getElementById("event_debug");
-    if (debug.classList.contains("matches"))
-        return;
-    debug.textContent = event.translate();
-
-    if (event.type === LongPress) {
-        nextEventToSkip = {button: event.button, type: MouseUp};
-    }
-    if (!myOptionsManager.options.events) return;
-    for (let option of myOptionsManager.options.events) {
-        if (event.type === option.type && event.button === option.button && event.buttonsDown === option.buttonsDown) {
-            debug.textContent += " = " + browser.i18n.getMessage("command_" + option.command);
-            debug.classList.toggle("matches", true);
-            setTimeout(function () {
-                debug.classList.remove("matches");
-            }, 2000);
-        }
-    }
+    window.addEventListener("wheel", preventDefault, false);
 }
 
-function resetEventSequence() {
-    recordedSequence = eventSequence;
-    eventSequence = new MouseEventSequence();
+function recordSequence() {
+    if (!port) {
+        let debug = document.getElementById("sequence_debug");
+        let input = document.getElementById("recorded_sequence");
+        port = browser.runtime.connect({"name": "sequence"});
+        port.onMessage.addListener((message) => {
+            if (debug.classList.contains("matches")) {
+                return;
+            }
+            debug.textContent = sequenceDebugText(message.sequence, message.command);
+            input.value = message.sequence.join(",");
+            if (message.command) {
+                setMatches(debug);
+            }
+        });
+    }
+    window.addEventListener("wheel", preventDefault, false);
 }
 
-function recordSequence(e) {
-    clearTimeout(resetSequenceTimer);
-    let event = e.detail;
-    if (nextEventToSkip && nextEventToSkip.button === event.button && nextEventToSkip.type === event.type) {
-        nextEventToSkip = null;
-        resetEventSequence();
-        return;
+function setMatches(area) {
+    area.classList.toggle("matches", true);
+    setTimeout(function () {
+        area.classList.remove("matches");
+    }, 1000);
+}
+
+function disconnectPort() {
+    if (port) {
+        port.disconnect();
+        port = null;
     }
-    let debug = document.getElementById("sequence_debug");
-    if (debug.classList.contains("matches"))
-        return;
-    eventSequence.add(event);
-    debug.textContent = eventSequence.translate();
-    if (event.type === LongPress) {
-        nextEventToSkip = {button: event.button, type: MouseUp};
-    }
-    resetSequenceTimer = setTimeout(resetEventSequence, 350);
-    if (!myOptionsManager.options.sequences) return;
-    for (let option of myOptionsManager.options.sequences) {
-        let s = new MouseEventSequence();
-        s.parseFromString(option.sequence);
-        if (eventSequence.equals(s)) {
-            debug.textContent += " = " + browser.i18n.getMessage("command_" + option.command);
-            debug.classList.toggle("matches", true);
-            setTimeout(function () {
-                debug.classList.remove("matches");
-            }, 2000);
-        }
-    }
+    window.removeEventListener("wheel", preventDefault, false);
+}
+
+function preventDefault(e) {
+    e.preventDefault();
+    return false;
 }
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -182,14 +175,24 @@ document.addEventListener("DOMContentLoaded", function () {
         }]);
     });
     document.getElementById("add_recorded_sequence").addEventListener("click", function () {
-        updateSequencesTable([{
-            "sequence": recordedSequence.toString(),
-            "command": ""
-        }]);
+        let form = document.getElementById("sequence_record_area");
+        let valid = form.checkValidity();
+        form.classList.toggle("invalid", !valid);
+        if (valid) {
+            let input = document.getElementById("recorded_sequence");
+            updateSequencesTable([{
+                "sequence": input.value,
+                "command": ""
+            }]);
+        }
     });
     document.getElementById("events").addEventListener("change", saveEvents);
     document.getElementById("sequences").addEventListener("change", saveSequences);
 
-    document.getElementById("event_test_area").addEventListener("mousecommmand", testMouseEvent);
-    document.getElementById("sequence_record_area").addEventListener("mousecommmand", recordSequence);
+    document.getElementById("event_test_area").addEventListener("mouseenter", testMouseEvent);
+    document.getElementById("sequence_record_area").addEventListener("mouseenter", recordSequence);
+    document.getElementById("event_test_area").addEventListener("mouseleave", disconnectPort);
+    document.getElementById("sequence_record_area").addEventListener("mouseleave", disconnectPort);
+    document.getElementById("event_test_area").addEventListener("contextmenu", preventDefault);
+    document.getElementById("sequence_record_area").addEventListener("contextmenu", preventDefault);
 });

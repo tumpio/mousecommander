@@ -1,5 +1,5 @@
 {
-    "app_name": "mouse_commander",
+    "app_name": "mousecommander",
     "main_module": "src/main/python/main.py",
     "author": "tumpio",
     "version": "0.0.1"

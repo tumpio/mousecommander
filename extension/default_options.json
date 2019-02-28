@@ -41,11 +41,11 @@
   ],
   "sequences": [
     {
-      "sequence": "c12c02c12c02",
+      "sequence": "c12,c02,c12,c02",
       "command": "findSelectedText"
     },
     {
-      "sequence": "c12c02c12c22",
+      "sequence": "c12,c02,c12,c22",
       "command": "toggleBookmark"
     }
   ]

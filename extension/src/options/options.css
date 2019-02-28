@@ -72,7 +72,22 @@ td, th {
     color: #151515;
 }
 
+.test_area.invalid {
+    border-color: #a72f2f;
+}
+
 .test_area > .matches {
     color: #003eaa;
     font-weight: bold;
+}
+
+.test_area > p {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+#recorded_sequence {
+    display: none;
 }

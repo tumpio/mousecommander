@@ -15,7 +15,7 @@
     "message": "Test Event"
   },
   "record_sequence": {
-    "message": "Test & Record Sequence"
+    "message": "Record & Test Sequence"
   },
   "new_event": {
     "message": "New Event"
@@ -26,19 +26,8 @@
   "button": {
     "message": "Button"
   },
-  "event_info": {
-    "message": "$BUTTON$ $EVENT$",
-    "placeholders": {
-      "button": {
-        "content": "$1"
-      },
-      "event": {
-        "content": "$2"
-      }
-    }
-  },
   "button_down_info": {
-    "message": "$BUTTON_DOWN$ Button Down",
+    "message": "$BUTTON_DOWN$ Down",
     "placeholders": {
       "button_down": {
         "content": "$1"
@@ -46,7 +35,7 @@
     }
   },
   "buttons_down_info": {
-    "message": "$BUTTONS_DOWN$ Buttons Down",
+    "message": "$BUTTONS_DOWN$ Down",
     "placeholders": {
       "buttons_down": {
         "content": "$1"
@@ -83,13 +72,13 @@
   "long_press": {
     "message": "Long Press"
   },
-  "primary_button": {
+  "button_primary": {
     "message": "Primary"
   },
-  "middle_button": {
+  "button_middle": {
     "message": "Middle"
   },
-  "secondary_button": {
+  "button_secondary": {
     "message": "Secondary"
   },
   "command_switchToNextTab": {
@@ -147,10 +136,10 @@
     "message": "Toggle page bookmark"
   },
   "event_primary_up": {
-    "message": "Primary button up"
+    "message": "Primary up"
   },
   "event_primary_down": {
-    "message": "Primary button down"
+    "message": "Primary down"
   },
   "event_primary_click": {
     "message": "Primary click"
@@ -162,10 +151,10 @@
     "message": "Primary long press"
   },
   "event_middle_up": {
-    "message": "Middle button up"
+    "message": "Middle up"
   },
   "event_middle_down": {
-    "message": "Middle button down"
+    "message": "Middle down"
   },
   "event_middle_click": {
     "message": "Middle click"
@@ -177,10 +166,10 @@
     "message": "Middle long press"
   },
   "event_secondary_up": {
-    "message": "Secondary button up"
+    "message": "Secondary up"
   },
   "event_secondary_down": {
-    "message": "Secondary button down"
+    "message": "Secondary down"
   },
   "event_secondary_click": {
     "message": "Secondary click"

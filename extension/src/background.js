@@ -4,7 +4,12 @@
 
 let buttonsDown = 0;
 let sequenceTimer = null;
-let skipEvent = null;
+let skipEvents = new Set();
+let testPort = null;
+let testingEvent = false;
+let testingSequence = false;
+let testSequence = [];
+let sequenceDebugPort = null;
 let commandBindings = new CommandBindings();
 let sequenceBinder = new SequenceBinder();
 let longPressTimer = {
@@ -12,39 +17,40 @@ let longPressTimer = {
     [MiddleButton]: null,
     [SecondaryButton]: null
 };
-let longPress = {
-    [PrimaryButton]: () => handleMouseEvent(EventPrimaryLongPress),
-    [MiddleButton]: () => handleMouseEvent(EventMiddleLongPress),
-    [SecondaryButton]: () => handleMouseEvent(EventSecondaryLongPress)
-};
 
-const port = browser.runtime.connectNative("mouse_commander");
-port.postMessage("start_signal");
+function onLongPress(button) {
+    return () => {
+        longPressTimer[button] = null;
+        onMouseEvent(EventLongPress[button]);
+    }
+}
 
-port.onMessage.addListener(onMouseEvent);
+const clientPort = browser.runtime.connectNative(CLIENT_NAME);
+clientPort.postMessage(MESSAGE_START_SIGNAL);
+
+clientPort.onMessage.addListener(onMouseEvent);
 browser.storage.local.get().then(initOptions);
 browser.storage.onChanged.addListener(initChangedOptions);
 
 browser.windows.onFocusChanged.addListener((windowId) => {
     if (windowId == browser.windows.WINDOW_ID_NONE) {
-        port.onMessage.removeListener(onMouseEvent);
+        clientPort.onMessage.removeListener(onMouseEvent);
     } else {
-        port.onMessage.addListener(onMouseEvent);
+        clientPort.onMessage.addListener(onMouseEvent);
     }
 });
 
-function wrapReset(command) {
-    return () => {
-        sequenceBinder.reset();
-        return command();
-    };
-}
+browser.runtime.onConnect.addListener((port) => {
+    testPort = port;
+    testingEvent = port.name === "event";
+    testingSequence = port.name === "sequence";
+    port.onDisconnect.addListener(onDebugDisconnected);
+});
 
-function wrapSkip(event, command) {
-    return () => {
-        skipEvent = event;
-        return command();
-    };
+function onDebugDisconnected() {
+    testPort = null;
+    testingEvent = false;
+    testingSequence = false;
 }
 
 function initOptions(options) {
@@ -65,8 +71,8 @@ function initEvents(events) {
     if (!events) return;
     commandBindings = new CommandBindings();
     for (let option of events) {
-        let button = MouseButtonNames[option.button];
-        let command = wrapReset(commands[option.command]);
+        let button = MouseButtonValues[option.button];
+        let command = commands[option.command];
         let event = null;
         switch (option.type) {
             case TYPE_MOUSE_UP:
@@ -83,7 +89,6 @@ function initEvents(events) {
                 break;
             case TYPE_LONG_PRESS:
                 event = EventLongPress[button];
-                command = wrapSkip(EventMouseUp[button], command);
                 break;
         }
         commandBindings.bind(event, new CommandBinding(command, getButtonsDownValue(option.buttonsDown)));
@@ -94,57 +99,96 @@ function initSequences(sequences) {
     if (!sequences) return;
     sequenceBinder = new SequenceBinder();
     for (let option of sequences) {
-        let sequence = parseSequence(option.sequence);
-        sequenceBinder.bind(sequence, commands[option.command]);
+        sequenceBinder.bind(option.sequence.split(","), commands[option.command]);
     }
 }
 
-function onMouseEvent(message) {
-    let event = null;
-    if (message.length === 3 && message.startsWith(MESSAGE_MOUSE_CLICK)) {
-        let event_key = message.charAt(1);
-        let button = MESSAGE_BUTTON_KEYS[message.charAt(2)];
-        if (event_key === MESSAGE_MOUSE_UP) {
-            clearTimeout(longPressTimer[button]);
-            buttonsDown ^= MouseButtonDown[button];
-            event = EventMouseUp[button];
-        } else if (event_key === MESSAGE_MOUSE_DOWN) {
-            longPressTimer[button] = setTimeout(
-                longPress[button],
-                LONG_PRESS_DURATION
-            );
-            buttonsDown |= MouseButtonDown[button];
-            event = EventMouseDown[button];
-        }
-    } else if (message.length === 2 && message.startsWith(MESSAGE_MOUSE_SCROLL)) {
-        let event_key = message.charAt(1);
-        if (event_key === MESSAGE_SCROLL_UP) {
-            event = EventScrollUp;
-        } else if (event_key === MESSAGE_SCROLL_DOWN) {
-            event = EventScrollDown;
-        }
+function onMouseEvent(event) {
+    updateButtonsDown(event);
+    if (skipEvents.has(event)) {
+        skipEvents.delete(event);
+        return;
     }
-    if (event) {
-        handleMouseEvent(event);
-    }
-}
-
-function handleMouseEvent(event) {
     if (sequenceTimer) {
         clearTimeout(sequenceTimer);
         sequenceTimer = null;
     }
-    if (event !== skipEvent && typeof commandBindings[event] !== "undefined") {
-        for (let binding of commandBindings[event]) {
-            if (buttonsDown & binding.buttonsDown) {
-                return binding.execute();
-            }
-        }
+    if (testingEvent) {
+        messageTestEvent(event);
+    } else if (testingSequence) { 
+        messageTestSequence(event);
     } else {
-        skipEvent = null;
+        executeBinding(event);
     }
-    if (!sequenceTimer) {
-        sequenceTimer = setTimeout(sequenceBinder.reset, EVENT_SEQUENCE_TIMEOUT);
+}
+
+function updateButtonsDown(event) {
+    if (event.length !== 3) {
+        return;
     }
+    let button = event.charAt(2);
+    if (event === EventMouseUp[button]) {
+        if (longPressTimer[button]) {
+            clearTimeout(longPressTimer[button]);
+            longPressTimer[button] = null;
+        }
+        buttonsDown ^= MouseButtonDown[button];
+    } else if (event === EventMouseDown[button]) {
+        longPressTimer[button] = setTimeout(
+            onLongPress(button),
+            LONG_PRESS_DURATION
+        );
+        buttonsDown |= MouseButtonDown[button];
+    } else if (event === EventLongPress[button]) {
+        skipEvents.add(EventMouseUp[button]);
+    }
+    for (let [k, v] of Object.entries(longPressTimer)) {
+        if (v && k !== button) {
+            clearTimeout(v);
+            longPressTimer[k] = setTimeout(
+                onLongPress(k),
+                LONG_PRESS_DURATION
+            );
+        }
+    }
+}
+
+function executeBinding(event) {
+    let binding = commandBindings.getBinding(event, buttonsDown);
+    if (binding) {
+        sequenceBinder.reset();
+        binding.command();
+    } else if (sequenceBinder.execute(event)) {
+        sequenceBinder.reset();
+    } else {
+        setTimeout(sequenceBinder.reset, EVENT_SEQUENCE_TIMEOUT);
+    }
+}
+
+function messageTestEvent(event) {
+    let binding = commandBindings.getBinding(event, buttonsDown);
+    let message = {
+        "event": event,
+        "buttonsDown": buttonsDown,
+    };
+    if (binding) {
+        message["command"] = binding.command.name;
+    }
+    testPort.postMessage(message);
+}
+
+function messageTestSequence(event) {
+    testSequence.push(event);
     sequenceBinder.advance(event);
+    let message = {
+        "sequence": testSequence
+    };
+    if (typeof sequenceBinder.current === "function") {
+        message["command"] = sequenceBinder.current.name;
+    }
+    testPort.postMessage(message);
+    sequenceTimer = setTimeout(() => {
+        sequenceBinder.reset();
+        testSequence = [];
+    }, EVENT_SEQUENCE_TIMEOUT);
 }
