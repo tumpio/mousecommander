@@ -116,7 +116,9 @@ function restoreClosedTab() {
         maxResults: 1
     }).then(sessionInfos => {
         let sessionInfo = sessionInfos[0];
-        if (sessionInfo.tab) {
+        if (!sessionInfo) {
+            createNewTab();
+        } else if (sessionInfo.tab) {
             browser.sessions.restore(sessionInfo.tab.sessionId);
         } else {
             browser.sessions.restore(sessionInfo.window.sessionId);
@@ -132,13 +134,15 @@ function createNewTab() {
 
 function increaseZoom() {
     return browser.tabs.getZoom().then(zoom => {
-        browser.tabs.setZoom(null, zoom + 0.1);
+        if (zoom < 3)
+            browser.tabs.setZoom(null, zoom + 0.1);
     });
 }
 
 function decreaseZoom() {
     return browser.tabs.getZoom().then(zoom => {
-        browser.tabs.setZoom(null, zoom - 0.1);
+        if (zoom > 0.3)
+            browser.tabs.setZoom(null, zoom - 0.1);
     });
 }
 
@@ -186,9 +190,13 @@ function findSelectedText() {
     browser.tabs.executeScript({
         code: "window.getSelection().toString();"
     }).then(text => {
+        if (!text[0])
+            return Promise.reject();
         return browser.find.find(text[0]);
     }).then(() => {
         browser.find.highlightResults();
+    }, () => {
+        browser.find.removeHighlighting();
     });
 }
 
