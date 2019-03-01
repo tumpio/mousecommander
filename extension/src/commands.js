@@ -4,146 +4,185 @@
 
 const commands = {
     switchToNextTab: switchToNextTab,
+    switchToNextTabLoop: switchToNextTabLoop,
     switchToPreviousTab: switchToPreviousTab,
+    switchToPreviousTabLoop: switchToPreviousTabLoop,
+    restoreLastActiveTab: restoreLastActiveTab,
+    createNewTab: createNewTab,
+    dublicateCurrentTab: dublicateCurrentTab,
+    toggleTabPinning: toggleTabPinning,
+    moveTabToNewWindow: moveTabToNewWindow,
     closeCurrentTab: closeCurrentTab,
     closeOtherTabs: closeOtherTabs,
     closeTabsOnLeft: closeTabsOnLeft,
     closeTabsOnRight: closeTabsOnRight,
-    dublicateCurrentTab: dublicateCurrentTab,
-    reloadCurrentTab: reloadCurrentTab,
-    moveCurrentTabToNewWindow: moveCurrentTabToNewWindow,
     restoreClosedTab: restoreClosedTab,
-    createNewTab: createNewTab,
+    goBackInHistory: goBackInHistory,
+    goForwardInHistory: goForwardInHistory,
+    reloadPage: reloadPage,
     increaseZoom: increaseZoom,
     decreaseZoom: decreaseZoom,
     resetZoom: resetZoom,
     scrollToTop: scrollToTop,
     scrollToBottom: scrollToBottom,
-    findSelectedText: findSelectedText,
-    toggleBookmark: toggleBookmark
+    highlightSelectedText: highlightSelectedText,
+    toggleBookmark: toggleBookmark,
+    toggleReaderMode: toggleReaderMode
 };
 
 // Tab commands
 
-function switchToNextTab() {
-    return Promise.all([
-        getAllTabs(),
-        getCurrentTab()
-    ]).then(function ([all, current]) {
-        let nextIndex = current[0].index + 1;
-        if (nextIndex >= all.length) {
-            nextIndex = 0;
-        }
-        return browser.tabs.query({index: nextIndex, currentWindow: true});
-    }).then(activateTab);
+async function switchToNextTabLoop() {
+    let [current, all] = await Promise.all([
+        getCurrentTab(),
+        getAllTabs()
+    ]);
+    let nextIndex = current.index + 1;
+    if (nextIndex >= all.length) {
+        nextIndex = 0;
+    }
+    let query = await browser.tabs.query({ index: nextIndex, currentWindow: true });
+    return browser.tabs.update(query[0].id, { active: true });
 }
 
-function switchToPreviousTab() {
-    return Promise.all([
-        getAllTabs(),
-        getCurrentTab()
-    ]).then(function ([all, current]) {
-        let prevIndex = current[0].index - 1;
-        if (prevIndex < 0) {
-            prevIndex = all.length - 1;
-        }
-        return browser.tabs.query({index: prevIndex, currentWindow: true});
-    }).then(activateTab);
+async function switchToPreviousTabLoop() {
+    let [current, all] = await Promise.all([
+        getCurrentTab(),
+        getAllTabs()
+    ]);
+    let prevIndex = current.index - 1;
+    if (prevIndex < 0) {
+        prevIndex = all.length - 1;
+    }
+    let query = await browser.tabs.query({ index: prevIndex, currentWindow: true });
+    return browser.tabs.update(query[0].id, { active: true });
 }
 
-function closeCurrentTab() {
-    return getCurrentTab().then(values => {
-        browser.tabs.remove(values[0].id);
-    });
+async function switchToNextTab() {
+    let [current, all] = await Promise.all([
+        getCurrentTab(),
+        getAllTabs()
+    ]);
+    let nextIndex = current.index + 1;
+    if (nextIndex < all.length) {
+        let query = await browser.tabs.query({ index: nextIndex, currentWindow: true });
+        return browser.tabs.update(query[0].id, { active: true });
+    }
 }
 
-function closeOtherTabs() {
-    return browser.tabs.query({
-        active: false, currentWindow: true
-    }).then(values => {
-        let tabsToClose = [];
-        for (let tab of values) {
-            tabsToClose.push(tab.id);
-        }
-        browser.tabs.remove(tabsToClose);
-    });
+async function switchToPreviousTab() {
+    let current = await getCurrentTab();
+    let prevIndex = current.index - 1;
+    if (prevIndex >= 0) {
+        let query = await browser.tabs.query({ index: prevIndex, currentWindow: true });
+        return browser.tabs.update(query[0].id, { active: true });
+    }
 }
 
-function closeTabsOnLeft() {
-    return getAllTabs().then(values => {
-        let tabsToClose = [];
-        for (let tab of values) {
-            if (tab.active)
-                break;
-            tabsToClose.push(tab.id);
-        }
-        browser.tabs.remove(tabsToClose);
-    });
+async function closeCurrentTab() {
+    let current = await getCurrentTab();
+    return browser.tabs.remove(current.id);
 }
 
-function closeTabsOnRight() {
-    return getAllTabs().then(values => {
-        let tabsToClose = [];
-        for (let i = values.length - 1; i >= 0; i--) {
-            if (values[i].active)
-                break;
-            tabsToClose.push(values[i].id);
-        }
-        browser.tabs.remove(tabsToClose);
-    });
+async function closeOtherTabs() {
+    let other = await getOtherTabs();
+    let toClose = [];
+    for (let tab of other) {
+        toClose.push(tab.id);
+    }
+    return browser.tabs.remove(toClose);
 }
 
-function dublicateCurrentTab() {
-    return getCurrentTab().then(values => {
-        browser.tabs.duplicate(values[0].id);
-    });
+async function closeTabsOnLeft() {
+    let tabs = await getAllTabs();
+    let toClose = [];
+    for (let tab of tabs) {
+        if (tab.active)
+            break;
+        toClose.push(tab.id);
+    }
+    return browser.tabs.remove(toClose);
 }
 
-function reloadCurrentTab() {
-    return getCurrentTab().then(values => {
-        browser.tabs.reload(values[0].id);
-    });
+async function closeTabsOnRight() {
+    let tabs = await getAllTabs();
+    let toClose = [];
+    for (let i = tabs.length - 1; i >= 0; i--) {
+        if (tabs[i].active)
+            break;
+        toClose.push(tabs[i].id);
+    }
+    return browser.tabs.remove(toClose);
 }
 
-function moveCurrentTabToNewWindow() {
-    return getCurrentTab().then(values => {
-        browser.windows.create({tabId: values[0].id});
-    });
+async function dublicateCurrentTab() {
+    let current = await getCurrentTab();
+    return browser.tabs.duplicate(current.id);
 }
 
-function restoreClosedTab() {
-    return browser.sessions.getRecentlyClosed({
+function reloadPage() {
+    return browser.tabs.reload();
+}
+
+async function moveTabToNewWindow() {
+    let current = await getCurrentTab();
+    return browser.windows.create({ tabId: current.id });
+}
+
+async function restoreClosedTab() {
+    let sessionInfos = await browser.sessions.getRecentlyClosed({
         maxResults: 1
-    }).then(sessionInfos => {
-        let sessionInfo = sessionInfos[0];
-        if (!sessionInfo) {
-            createNewTab();
-        } else if (sessionInfo.tab) {
-            browser.sessions.restore(sessionInfo.tab.sessionId);
-        } else {
-            browser.sessions.restore(sessionInfo.window.sessionId);
-        }
     });
+    let sessionInfo = sessionInfos[0];
+    if (!sessionInfo) {
+        return createNewTab();
+    } else if (sessionInfo.tab) {
+        return browser.sessions.restore(sessionInfo.tab.sessionId);
+    } else if (sessionInfo.window) {
+        return browser.sessions.restore(sessionInfo.window.sessionId);
+    }
+}
+
+async function restoreLastActiveTab() {
+    let tabs = await browser.tabs.query({
+        active: false, currentWindow: true
+    });
+    let tab = tabs[0];
+    for (let i = 1; i < tabs.length; i++) {
+        if (tabs[i].lastAccessed > tab.lastAccessed)
+            tab = tabs[i];
+    }
+    return browser.tabs.update(tab.id, { active: true });
 }
 
 function createNewTab() {
     return browser.tabs.create({});
 }
 
-// Zoom commands
-
-function increaseZoom() {
-    return browser.tabs.getZoom().then(zoom => {
-        if (zoom < 3)
-            browser.tabs.setZoom(null, zoom + 0.1);
-    });
+async function toggleTabPinning() {
+    let current = await getCurrentTab();
+    return browser.tabs.update({ "pinned": !current.pinned });
 }
 
-function decreaseZoom() {
-    return browser.tabs.getZoom().then(zoom => {
-        if (zoom > 0.3)
-            browser.tabs.setZoom(null, zoom - 0.1);
-    });
+function toggleReaderMode() {
+    browser.tabs.toggleReaderMode();
+}
+
+// Zoom commands
+
+const MAX_ZOOM = 3;
+const MIN_ZOOM = 0.3;
+
+async function increaseZoom() {
+    let zoom = await browser.tabs.getZoom();
+    if (zoom < MAX_ZOOM)
+        browser.tabs.setZoom(null, zoom + 0.1);
+}
+
+async function decreaseZoom() {
+    let zoom = await browser.tabs.getZoom();
+    if (zoom > MIN_ZOOM)
+        browser.tabs.setZoom(null, zoom - 0.1);
 }
 
 function resetZoom() {
@@ -152,23 +191,34 @@ function resetZoom() {
 
 // Bookmark commands
 
-function toggleBookmark() {
-    return getCurrentTab().then(values => {
-        let tab = values[0];
-        browser.bookmarks.search({
+async function toggleBookmark() {
+    let tab = await getCurrentTab();
+    let bookmarks = await browser.bookmarks.search({
+        url: tab.url
+    });
+    if (bookmarks.length) {
+        for (let bookmark of bookmarks) {
+            browser.bookmarks.remove(bookmark.id);
+        }
+    } else {
+        browser.bookmarks.create({
+            title: tab.title,
             url: tab.url
-        }).then(bookmarkItems => {
-            if (bookmarkItems.length) {
-                for (let bookmark of bookmarkItems) {
-                    browser.bookmarks.remove(bookmark.id);
-                }
-            } else {
-                browser.bookmarks.create({
-                    title: tab.title,
-                    url: tab.url
-                });
-            }
         });
+    }
+}
+
+// History commands
+
+function goBackInHistory() {
+    browser.tabs.executeScript({
+        code: "window.history.back();"
+    });
+}
+
+function goForwardInHistory() {
+    browser.tabs.executeScript({
+        code: "window.history.forward();"
     });
 }
 
@@ -186,7 +236,7 @@ function scrollToBottom() {
     });
 }
 
-function findSelectedText() {
+function highlightSelectedText() {
     browser.tabs.executeScript({
         code: "window.getSelection().toString();"
     }).then(text => {
@@ -202,18 +252,17 @@ function findSelectedText() {
 
 // Helper functions
 
-function activateTab(query) {
-    browser.tabs.update(
-        query[0].id, {active: true}
-    );
-}
-
-function getCurrentTab() {
-    return browser.tabs.query({
-        active: true, currentWindow: true
-    });
+async function getCurrentTab() {
+    let query = await browser.tabs.query({ active: true, currentWindow: true });
+    return query[0];
 }
 
 function getAllTabs() {
-    return browser.tabs.query({currentWindow: true});
+    return browser.tabs.query({ currentWindow: true });
+}
+
+function getOtherTabs() {
+    return browser.tabs.query({
+        active: false, currentWindow: true
+    });
 }

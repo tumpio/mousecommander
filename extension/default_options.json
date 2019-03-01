@@ -42,7 +42,7 @@
   "sequences": [
     {
       "sequence": "c12,c02,c12,c02",
-      "command": "findSelectedText"
+      "command": "highlightSelectedText"
     },
     {
       "sequence": "c12,c02,c12,c22",

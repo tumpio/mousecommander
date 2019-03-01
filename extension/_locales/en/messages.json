@@ -81,11 +81,11 @@
   "button_secondary": {
     "message": "Secondary"
   },
-  "command_switchToNextTab": {
-    "message": "Switch to next tab"
+  "command_switchToNextTabLoop": {
+    "message": "Switch to next tab (loop)"
   },
-  "command_switchToPreviousTab": {
-    "message": "Switch to previous tab"
+  "command_switchToPreviousTabLoop": {
+    "message": "Switch to previous tab (loop)"
   },
   "command_closeCurrentTab": {
     "message": "Close tab"
@@ -102,10 +102,10 @@
   "command_dublicateCurrentTab": {
     "message": "Duplicate tab"
   },
-  "command_reloadCurrentTab": {
+  "command_reloadPage": {
     "message": "Reload page"
   },
-  "command_moveCurrentTabToNewWindow": {
+  "command_moveTabToNewWindow": {
     "message": "Move tab to new window"
   },
   "command_restoreClosedTab": {
@@ -129,11 +129,32 @@
   "command_scrollToBottom": {
     "message": "Scroll bottom"
   },
-  "command_findSelectedText": {
+  "command_highlightSelectedText": {
     "message": "Highlight selected text"
   },
   "command_toggleBookmark": {
     "message": "Toggle page bookmark"
+  },
+  "command_switchToNextTab": {
+    "message": "Switch to next tab"
+  },
+  "command_switchToPreviousTab": {
+    "message": "Switch to previous tab"
+  },
+  "command_restoreLastActiveTab": {
+    "message": "Restore last active tab"
+  },
+  "command_toggleTabPinning": {
+    "message": "Toggle tab pinning"
+  },
+  "command_toggleReaderMode": {
+    "message": "Toggle reader mode"
+  },
+  "command_goBackInHistory": {
+    "message": "Back in history"
+  },
+  "command_goForwardInHistory": {
+    "message": "Forward in history"
   },
   "event_primary_up": {
     "message": "Primary up"
