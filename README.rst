@@ -98,11 +98,8 @@ Start extension and client application in Firefox:
 
 License
 ~~~~~~~
-::
-
-    This Source Code Form is subject to the terms of the Mozilla Public
-    License, v. 2.0. If a copy of the MPL was not distributed with this
-    file, You can obtain one at http://mozilla.org/MPL/2.0/.
+Extension is licensed under the MPL-2.0.
+Application is licensed under the GPLv3.
 
 .. _Native Messaging: https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Native_messaging
 .. _Native messaging manifest: https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Native_manifests#Native_messaging_manifests

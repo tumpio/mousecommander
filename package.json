@@ -17,16 +17,6 @@
     "build": "cd app && pipenv run fbs freeze",
     "start": "web-ext run --bc -s ./extension/ --url about:addons"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/tumpio/mousecommander.git"
-  },
-  "author": "tumpio",
-  "license": "MPL-2.0",
-  "bugs": {
-    "url": "https://github.com/tumpio/mousecommander/issues"
-  },
-  "homepage": "https://github.com/tumpio/mousecommander#readme",
   "eslintConfig": {
     "extends": "eslint:recommended",
     "env": {
