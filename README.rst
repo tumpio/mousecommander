@@ -16,16 +16,13 @@ buttons are hold down, or with a sequence of mouse button events.
 
 For example, it's possible to switch between tabs with mouse wheel:
 
-- Mouse wheel up + Secondary mouse button down -> Change to next tab
-- Mouse wheel down + Secondary mouse button down -> Change to previous tab
+- Wheel up + Secondary down -> Change to next tab
+- wheel down + Secondary down -> Change to previous tab
 
-A sequence of mouse button events is a combination of multiple mouse
-button events (button down/up/long press and wheel up/down).
+Examples of mouse button events in sequence to trigger browser actions:
 
-Examples of mouse button event sequences to trigger browser actions:
-
-- Secondary button double click -> Open new tab
-- Secondary button click + Secondary button long press -> Duplicate tab
+- Double secondary click -> Open new tab
+- Secondary click + Secondary long press -> Duplicate tab
 
 Supported mouse button events
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -45,12 +42,16 @@ Supported browser actions
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 - Switch to next tab
 - Switch to previous tab
+- Restore last active tab
 - Close tab
 - Close other tabs
 - Close tabs on left
 - Close tabs on right
+- Toggle tab pinning
 - Duplicate tab
 - Reload page
+- Back in history
+- Forward in history
 - Move tab to new window
 - Restore closed tab
 - Create new tab
@@ -61,11 +62,12 @@ Supported browser actions
 - Scroll bottom
 - Highlight selected text
 - Toggle page bookmark
+- Toggle reader mode
 
 Development
 ~~~~~~~~~~~
 
-Requirements: Python 3.6, pyunput, Python for Qt, fbs
+Requirements: Python 3.6, pynput, Python for Qt, fbs
 
 Clone the repository and install npm and pipenv.
 
