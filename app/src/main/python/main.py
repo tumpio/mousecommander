@@ -12,7 +12,7 @@ from PySide2.QtCore import Qt, QThread, Signal
 from PySide2.QtGui import QIcon
 from PySide2.QtWidgets import (QAction, QMenu, QMessageBox, QSystemTrayIcon)
 
-name = "Mouse Commander Client"
+name = "Mouse Commander Native Client"
 version = 0.1
 
 MESSAGE_QUEUE = Queue(10)

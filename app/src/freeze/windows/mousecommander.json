@@ -1,0 +1,9 @@
+{
+    "allowed_extensions": [
+        "mousecommander-native@addons.mozilla.org"
+    ],
+    "description": "Mouse Commander integration with native messaging support",
+    "name": "mousecommander",
+    "path": "",
+    "type": "stdio"
+}

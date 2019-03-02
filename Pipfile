@@ -13,6 +13,7 @@ fbs = "*"
 pyinstaller = "==3.4"
 pynput = "*"
 pyside2 = "*"
+pypiwin32 =  { version = "*", os_name = "=='nt'" }
 
 [requires]
 python_version = "3.6"
