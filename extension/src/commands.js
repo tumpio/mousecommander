@@ -120,7 +120,7 @@ async function dublicateCurrentTab() {
     return browser.tabs.duplicate(current.id);
 }
 
-function reloadPage() {
+async function reloadPage() {
     return browser.tabs.reload();
 }
 
@@ -137,7 +137,8 @@ async function restoreClosedTab() {
     if (!sessionInfo) {
         return createNewTab();
     } else if (sessionInfo.tab) {
-        return browser.sessions.restore(sessionInfo.tab.sessionId);
+        let session = await browser.sessions.restore(sessionInfo.tab.sessionId);
+        return contentScriptReady(session.tab.id);
     } else if (sessionInfo.window) {
         return browser.sessions.restore(sessionInfo.window.sessionId);
     }
@@ -155,7 +156,7 @@ async function restoreLastActiveTab() {
     return browser.tabs.update(tab.id, { active: true });
 }
 
-function createNewTab() {
+async function createNewTab() {
     return browser.tabs.create({});
 }
 
@@ -164,8 +165,8 @@ async function toggleTabPinning() {
     return browser.tabs.update({ "pinned": !current.pinned });
 }
 
-function toggleReaderMode() {
-    browser.tabs.toggleReaderMode();
+async function toggleReaderMode() {
+    return browser.tabs.toggleReaderMode();
 }
 
 // Zoom commands
@@ -176,16 +177,16 @@ const MIN_ZOOM = 0.3;
 async function increaseZoom() {
     let zoom = await browser.tabs.getZoom();
     if (zoom < MAX_ZOOM)
-        browser.tabs.setZoom(null, zoom + 0.1);
+        return browser.tabs.setZoom(null, zoom + 0.1);
 }
 
 async function decreaseZoom() {
     let zoom = await browser.tabs.getZoom();
     if (zoom > MIN_ZOOM)
-        browser.tabs.setZoom(null, zoom - 0.1);
+        return browser.tabs.setZoom(null, zoom - 0.1);
 }
 
-function resetZoom() {
+async function resetZoom() {
     return browser.tabs.setZoom(null, 0);
 }
 
@@ -198,10 +199,10 @@ async function toggleBookmark() {
     });
     if (bookmarks.length) {
         for (let bookmark of bookmarks) {
-            browser.bookmarks.remove(bookmark.id);
+            await browser.bookmarks.remove(bookmark.id);
         }
     } else {
-        browser.bookmarks.create({
+        return browser.bookmarks.create({
             title: tab.title,
             url: tab.url
         });
@@ -210,34 +211,34 @@ async function toggleBookmark() {
 
 // History commands
 
-function goBackInHistory() {
-    browser.tabs.executeScript({
+async function goBackInHistory() {
+    return browser.tabs.executeScript({
         code: "window.history.back();"
     });
 }
 
-function goForwardInHistory() {
-    browser.tabs.executeScript({
+async function goForwardInHistory() {
+    return browser.tabs.executeScript({
         code: "window.history.forward();"
     });
 }
 
 // Scroll commands
 
-function scrollToTop() {
-    browser.tabs.executeScript({
+async function scrollToTop() {
+    return browser.tabs.executeScript({
         code: "window.scrollTo(window.scrollX, 0);"
     });
 }
 
-function scrollToBottom() {
-    browser.tabs.executeScript({
+async function scrollToBottom() {
+    return browser.tabs.executeScript({
         code: "window.scrollTo(window.scrollX, document.body.scrollHeight);"
     });
 }
 
-function highlightSelectedText() {
-    browser.tabs.executeScript({
+async function highlightSelectedText() {
+    return browser.tabs.executeScript({
         code: "window.getSelection().toString();"
     }).then(text => {
         if (!text[0])
@@ -257,12 +258,48 @@ async function getCurrentTab() {
     return query[0];
 }
 
-function getAllTabs() {
+async function getAllTabs() {
     return browser.tabs.query({ currentWindow: true });
 }
 
-function getOtherTabs() {
+async function getOtherTabs() {
     return browser.tabs.query({
         active: false, currentWindow: true
+    });
+}
+
+async function preventContextMenu() {
+    let current = await getCurrentTab();
+    try {
+        await browser.tabs.sendMessage(current.id, {
+            preventContextMenu: true
+        });
+    } catch {
+        // content scripts not loaded to Mozilla privileged hosts
+    }
+}
+
+async function resetContextMenuSkip() {
+    let tabs = await getAllTabs();
+    for (let tab of tabs) {
+        try {
+            await browser.tabs.sendMessage(tab.id, {
+                reset: true
+            });
+        } catch {
+            // content scripts not loaded to Mozilla privileged hosts
+        }
+    }
+}
+
+function contentScriptReady(id) {
+    return new Promise((resolve, reject) => {
+        let listener = (port) => {
+            if (port.name === "content" && port.sender.tab.id === id) {
+                resolve();
+                browser.runtime.onConnect.removeListener(listener);
+            }
+        };
+        browser.runtime.onConnect.addListener(listener);
     });
 }

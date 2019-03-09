@@ -98,13 +98,13 @@ class CommandBindings {
         this[event].push(binding);
     }
 
-    getBinding(event, buttonsDown) {
+    getCommand(event, buttonsDown) {
         if (typeof this[event] === "undefined") {
             return null;
         }
         for (let binding of this[event]) {
             if (buttonsDown & binding.buttonsDown) {
-                return binding;
+                return binding.command;
             }
         }
         return null;
@@ -126,13 +126,12 @@ class SequenceBinder {
         }
     }
 
-    execute(event) {
+    getCommand(event) {
         this.advance(event);
         if (typeof this.current === "function") {
-            this.current();
-            return true;
+            return this.current;
         }
-        return false;
+        return null;
     }
 
     bind(sequence, command) {

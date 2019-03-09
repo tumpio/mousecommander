@@ -36,16 +36,21 @@ browser.windows.onFocusChanged.addListener((windowId) => {
     if (windowId == browser.windows.WINDOW_ID_NONE) {
         clientPort.onMessage.removeListener(onMouseEvent);
     } else {
+        buttonsDown = 0;
         clientPort.onMessage.addListener(onMouseEvent);
     }
 });
 
 browser.runtime.onConnect.addListener((port) => {
-    testPort = port;
-    testingEvent = port.name === "event";
-    testingSequence = port.name === "sequence";
-    port.onDisconnect.addListener(onDebugDisconnected);
+    if (port.name === "event" || port.name === "sequence") {
+        testPort = port;
+        testingEvent = port.name === "event";
+        testingSequence = !testingEvent;
+        port.onDisconnect.addListener(onDebugDisconnected);
+    }
 });
+
+browser.browserSettings.contextMenuShowEvent.set({ value: "mouseup" });
 
 function onDebugDisconnected() {
     testPort = null;
@@ -115,7 +120,7 @@ function onMouseEvent(event) {
     }
     if (testingEvent) {
         messageTestEvent(event);
-    } else if (testingSequence) { 
+    } else if (testingSequence) {
         messageTestSequence(event);
     } else {
         executeBinding(event);
@@ -133,6 +138,9 @@ function updateButtonsDown(event) {
             longPressTimer[button] = null;
         }
         buttonsDown ^= MouseButtonDown[button];
+        if (button === SecondaryButton) {
+            resetContextMenuSkip();
+        }
     } else if (event === EventMouseDown[button]) {
         longPressTimer[button] = setTimeout(
             onLongPress(button),
@@ -154,37 +162,39 @@ function updateButtonsDown(event) {
 }
 
 function executeBinding(event) {
-    let binding = commandBindings.getBinding(event, buttonsDown);
-    if (binding) {
+    let command = commandBindings.getCommand(event, buttonsDown) || sequenceBinder.getCommand(event);
+    if (command) {
         sequenceBinder.reset();
-        binding.command();
-    } else if (sequenceBinder.execute(event)) {
-        sequenceBinder.reset();
+        command().then(() => {
+            if (buttonsDown & MouseButtonDown[SecondaryButton]) {
+                preventContextMenu();
+            }
+        });
     } else {
         setTimeout(sequenceBinder.reset, EVENT_SEQUENCE_TIMEOUT);
     }
 }
 
 function messageTestEvent(event) {
-    let binding = commandBindings.getBinding(event, buttonsDown);
+    let command = commandBindings.getCommand(event, buttonsDown);
     let message = {
         "event": event,
-        "buttonsDown": buttonsDown,
+        "buttonsDown": buttonsDown
     };
-    if (binding) {
-        message["command"] = binding.command.name;
+    if (command) {
+        message["command"] = command.name;
     }
     testPort.postMessage(message);
 }
 
 function messageTestSequence(event) {
     testSequence.push(event);
-    sequenceBinder.advance(event);
+    let command = sequenceBinder.getCommand(event);
     let message = {
         "sequence": testSequence
     };
-    if (typeof sequenceBinder.current === "function") {
-        message["command"] = sequenceBinder.current.name;
+    if (command) {
+        message["command"] = command.name;
     }
     testPort.postMessage(message);
     sequenceTimer = setTimeout(() => {

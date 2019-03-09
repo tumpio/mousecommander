@@ -17,6 +17,7 @@
   "permissions": [
     "<all_urls>",
     "bookmarks",
+    "browserSettings",
     "find",
     "nativeMessaging",
     "sessions",
@@ -28,6 +29,13 @@
     "open_in_tab": true,
     "browser_style": true
   },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["src/content.js"],
+      "run_at": "document_start"
+    }
+  ],
   "background": {
     "page": "src/background.html"
   }
