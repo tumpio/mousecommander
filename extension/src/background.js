@@ -44,6 +44,21 @@ browser.runtime.onConnect.addListener((port) => {
     }
 });
 
+browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.status) {
+        if (clientPort && clientPort.error) {
+            sendResponse({
+                connected: false,
+                error: clientPort.error.message
+            });
+        } else {
+            sendResponse({
+                connected: clientPort !== null
+            });
+        }
+    }
+});
+
 browser.browserSettings.contextMenuShowEvent.set({ value: "mouseup" });
 
 function init(options) {
@@ -99,6 +114,11 @@ function initSequences(sequences) {
 
 function startClientConnection() {
     clientPort = browser.runtime.connectNative(CLIENT_NAME);
+    clientPort.onDisconnect.addListener((port) => {
+        if (!port.error) {
+            clientPort = null;
+        }
+    });
     clientPort.postMessage(MESSAGE_START_SIGNAL);
     clientPort.onMessage.addListener(onMouseEvent);
 }

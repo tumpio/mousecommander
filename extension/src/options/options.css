@@ -95,3 +95,13 @@ td, th {
 #recorded_sequence {
     display: none;
 }
+
+#error_main {
+    border: 2px dashed red;
+    padding: .3em 2em;
+    display: none;
+}
+
+#error_main.show {
+    display: block;
+}

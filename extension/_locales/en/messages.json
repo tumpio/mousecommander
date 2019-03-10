@@ -42,6 +42,17 @@
       }
     }
   },
+  "failed_to_connect_client": {
+    "message": "Connection Failure: $ERROR$",
+    "placeholders": {
+      "error": {
+        "content": "$1"
+      }
+    }
+  },
+  "no_connection_to_client": {
+    "message": "No connection to native client application!"
+  },
   "wheel": {
     "message": "Wheel"
   },

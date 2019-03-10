@@ -20,47 +20,54 @@
 
 <body>
     <main>
-        <h1 data-i18n="extensionName">
-            </h2>
-            <h2 data-i18n="mouse_button_events"></h2>
-            <div id="event_test_area" class="test_area">
-                <h2 data-i18n="test_button_event"></h2>
-                <p id="event_debug">&nbsp;</p>
-            </div>
-            <table class="events">
-                <thead>
-                    <tr>
-                        <th data-i18n="button"></th>
-                        <th data-i18n="event"></th>
-                        <th></th>
-                        <th data-i18n="buttons_down"></th>
-                        <th></th>
-                        <th data-i18n="action"></th>
-                    </tr>
-                </thead>
-                <tbody id="events">
-                </tbody>
-            </table>
-            <button id="add_new_event" data-i18n="new_event" class="primary"></button>
-            <hr>
-            <h2 data-i18n="event_sequences"></h2>
-            <form id="sequence_record_area" class="test_area">
-                <h2 data-i18n="record_sequence"></h2>
-                <p id="sequence_debug">&nbsp;</p>
-                <input id="recorded_sequence" type="text" required autocomplete="off">
-            </form>
-            <table>
-                <thead>
-                    <tr>
-                        <th data-i18n="sequence"></th>
-                        <th></th>
-                        <th data-i18n="action"></th>
-                    </tr>
-                </thead>
-                <tbody id="sequences">
-                </tbody>
-            </table>
-            <button id="add_recorded_sequence" data-i18n="add_recorded_sequence" class="primary"></button>
+        <h1 data-i18n="extensionName"></h1>
+        <div id="error_main">
+            <h4 data-i18n="no_connection_to_client"></h4>
+            <p id="error_message"></p>
+            <p><b>Important:</b> This extension requires installation of client
+                application for listening mouse events and messaging them to the
+                extension using the <a href="https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Native_messaging">Native Messaging</a> Firefox Extension API.</p>
+            <p>See <a href=https://github.com/tumpio/mousecommander/releases>client releases</a> for installing a client application for your OS.</p>
+        </div>
+        <h2 data-i18n="mouse_button_events"></h2>
+        <div id="event_test_area" class="test_area">
+            <h2 data-i18n="test_button_event"></h2>
+            <p id="event_debug">&nbsp;</p>
+        </div>
+        <table class="events">
+            <thead>
+                <tr>
+                    <th data-i18n="button"></th>
+                    <th data-i18n="event"></th>
+                    <th></th>
+                    <th data-i18n="buttons_down"></th>
+                    <th></th>
+                    <th data-i18n="action"></th>
+                </tr>
+            </thead>
+            <tbody id="events">
+            </tbody>
+        </table>
+        <button id="add_new_event" data-i18n="new_event" class="primary"></button>
+        <hr>
+        <h2 data-i18n="event_sequences"></h2>
+        <form id="sequence_record_area" class="test_area">
+            <h2 data-i18n="record_sequence"></h2>
+            <p id="sequence_debug">&nbsp;</p>
+            <input id="recorded_sequence" type="text" required autocomplete="off">
+        </form>
+        <table>
+            <thead>
+                <tr>
+                    <th data-i18n="sequence"></th>
+                    <th></th>
+                    <th data-i18n="action"></th>
+                </tr>
+            </thead>
+            <tbody id="sequences">
+            </tbody>
+        </table>
+        <button id="add_recorded_sequence" data-i18n="add_recorded_sequence" class="primary"></button>
     </main>
     <table id="model_s">
         <tr id="model_event">

@@ -166,6 +166,17 @@ document.addEventListener("DOMContentLoaded", function () {
             createOptions(myOptionsManager.options);
         }
     });
+    browser.runtime.sendMessage({
+        status: true
+    }).then((status) => {
+        console.log(status)
+        let dialog = document.querySelector("#error_main");
+        dialog.classList.toggle("show", !status.connected);
+        if (status.error) {
+            let message = document.querySelector("#error_message");
+            message.textContent = browser.i18n.getMessage("failed_to_connect_client", status.error);
+        }
+    });
     document.getElementById("add_new_event").addEventListener("click", function () {
         updateEventsTable([{
             "type": TYPE_MOUSE_DOWN,
