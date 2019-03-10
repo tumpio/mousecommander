@@ -4,7 +4,9 @@
 
 let buttonsDown = 0;
 let sequenceTimer = null;
+let noFocus = false;
 let skipEvents = new Set();
+let clientPort = null;
 let testPort = null;
 let testingEvent = false;
 let testingSequence = false;
@@ -17,27 +19,19 @@ let longPressTimer = {
     [MiddleButton]: null,
     [SecondaryButton]: null
 };
+let windowNoFocusTimer = null;
+let noFocusTimeout = 60 * 1000;
 
-function onLongPress(button) {
-    return () => {
-        longPressTimer[button] = null;
-        onMouseEvent(EventLongPress[button]);
-    }
-}
-
-const clientPort = browser.runtime.connectNative(CLIENT_NAME);
-clientPort.postMessage(MESSAGE_START_SIGNAL);
-
-clientPort.onMessage.addListener(onMouseEvent);
-browser.storage.local.get().then(initOptions);
+browser.storage.local.get().then(init);
 browser.storage.onChanged.addListener(initChangedOptions);
 
 browser.windows.onFocusChanged.addListener((windowId) => {
-    if (windowId == browser.windows.WINDOW_ID_NONE) {
-        clientPort.onMessage.removeListener(onMouseEvent);
-    } else {
-        buttonsDown = 0;
-        clientPort.onMessage.addListener(onMouseEvent);
+    clearTimeout(windowNoFocusTimer);
+    noFocus = windowId === browser.windows.WINDOW_ID_NONE;
+    if (noFocus) {
+        windowNoFocusTimer = setTimeout(disconnectClient, noFocusTimeout);
+    } else if (!clientPort) {
+        startClientConnection();
     }
 });
 
@@ -52,15 +46,10 @@ browser.runtime.onConnect.addListener((port) => {
 
 browser.browserSettings.contextMenuShowEvent.set({ value: "mouseup" });
 
-function onDebugDisconnected() {
-    testPort = null;
-    testingEvent = false;
-    testingSequence = false;
-}
-
-function initOptions(options) {
+function init(options) {
     initEvents(options["events"]);
     initSequences(options["sequences"]);
+    startClientConnection();
 }
 
 function initChangedOptions(change) {
@@ -108,12 +97,47 @@ function initSequences(sequences) {
     }
 }
 
+function startClientConnection() {
+    clientPort = browser.runtime.connectNative(CLIENT_NAME);
+    clientPort.postMessage(MESSAGE_START_SIGNAL);
+    clientPort.onMessage.addListener(onMouseEvent);
+}
+
+function disconnectClient() {
+    clientPort.onMessage.removeListener(onMouseEvent);
+    clientPort.disconnect();
+    clientPort = null;
+    for (let timer of Object.values(longPressTimer)) {
+        clearTimeout(timer);
+    }
+    sequenceBinder.reset();
+    buttonsDown = 0;
+}
+
+function onDebugDisconnected() {
+    testPort = null;
+    testingEvent = false;
+    testingSequence = false;
+}
+
+function onLongPress(button) {
+    return () => {
+        longPressTimer[button] = null;
+        onMouseEvent(EventLongPress[button]);
+    }
+}
+
 function onMouseEvent(event) {
     updateButtonsDown(event);
     if (skipEvents.has(event)) {
         skipEvents.delete(event);
         return;
     }
+
+    if (noFocus) {
+        return;
+    }
+
     if (sequenceTimer) {
         clearTimeout(sequenceTimer);
         sequenceTimer = null;
