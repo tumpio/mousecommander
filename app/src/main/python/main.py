@@ -13,7 +13,7 @@ from PySide2.QtGui import QIcon
 from PySide2.QtWidgets import (QAction, QMenu, QMessageBox, QSystemTrayIcon)
 
 name = "Mouse Commander Native Client"
-version = 0.1
+version = "1.0.0"
 
 MESSAGE_QUEUE = Queue(10)
 MESSAGE_ENCODING = "utf-8"
@@ -39,12 +39,14 @@ MESSAGE_SCROLL_PREFIX = bytes("s", MESSAGE_ENCODING)
 MESSAGE_START_SIGNAL = "start_signal"
 
 
-class NativeMessageListener(threading.Thread):
+class NativeMessageListener(QThread):
+    stop_signal = Signal()
 
     def run(self):
         while True:
             data = sys.stdin.buffer.raw.read(4)
             if not data:
+                self.stop_signal.emit()
                 break
             message_length = struct.unpack('@I', data)[0]
             message = json.loads(sys.stdin.buffer.raw.read(
@@ -145,19 +147,24 @@ class AppContext(ApplicationContext):
 
     @cached_property
     def tray_menu(self):
-        return SystemTrayMenu(action_enable=self.enable, action_about=self.about, action_quit=self.quit)
+        return SystemTrayMenu(action_enable=self.enable, action_about=self.about, action_quit=self.app.quit)
+
+    @cached_property
+    def tray(self):
+        return QSystemTrayIcon()
 
     def run(self):
         self.app.setQuitOnLastWindowClosed(False)
-        tray = QSystemTrayIcon()
-        tray.setContextMenu(self.tray_menu)
-        tray.setIcon(QIcon(context.get_resource("icon.svg")))
-        tray.setToolTip(name)
-        tray.setVisible(True)
+        self.app.aboutToQuit.connect(self.quit)
+        self.tray.setContextMenu(self.tray_menu)
+        self.tray.setIcon(QIcon(context.get_resource("icon.svg")))
+        self.tray.setToolTip(name)
+        self.tray.show()
         self.mouse_listener = NativeMouseListener()
         self.message_handler = NativeMessageConsumer(self.app)
         self.message_handler.start_signal.connect(self.start)
-        self.message_listener = NativeMessageListener(daemon=True)
+        self.message_listener = NativeMessageListener(self.app)
+        self.message_listener.stop_signal.connect(self.app.quit)
         self.message_handler.start()
         self.message_listener.start()
         return self.app.exec_()
@@ -188,10 +195,10 @@ class AppContext(ApplicationContext):
         ))
 
     def quit(self):
+        self.tray.hide()
         self.stop()
         self.message_handler.stop()
         self.message_handler.terminate()
-        self.app.quit()
 
 
 if __name__ == '__main__':
