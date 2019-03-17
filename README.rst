@@ -67,9 +67,9 @@ Supported browser actions
 Development
 ~~~~~~~~~~~
 
-Requirements: Python 3.6, pynput, Python for Qt, fbs
+Requirements: Python 3.6, pipenv, npm
 
-Clone the repository and install npm and pipenv.
+Clone the repository and install python 3.6, npm and pipenv.
 
 Create development environment running:
 
@@ -90,13 +90,39 @@ E.g. for linux manifest file:
 
 ::
 
-"path": "<path_to_cloned_repository>/app/target/mouse_commander/mouse_commander"
+"path": "<path_to_cloned_repository>/app/target/mousecommander/mousecommander"
 
 Start extension and client application in Firefox:
 
 ::
 
     npm start
+
+Creating installer
+~~~~~~~~~~~~~~~~~~
+
+For Windows:
+
+- Install `NSIS`_ and `NsJSON`_ plugin (extract plugin to ``%programs%\NSIS\Plugins``)
+- Install `Windows 10 SDK`_ (Windows 10 only)
+
+For Linux:
+
+- Install `fpm`_
+
+
+For Mac:
+
+- ???
+
+After above setup, create installer by running:
+
+::
+
+    pipenv shell
+    cd app
+    fbs freeze
+    fbs installer
 
 License
 ~~~~~~~
@@ -105,3 +131,7 @@ Application is licensed under the GPLv3.
 
 .. _Native Messaging: https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Native_messaging
 .. _Native messaging manifest: https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Native_manifests#Native_messaging_manifests
+.. _NSIS: https://nsis.sourceforge.io/Download
+.. _NsJSON: https://nsis.sourceforge.io/NsJSON_plug-in
+.. _Windows 10 SDK: https://developer.microsoft.com/en-us/windows/downloads/windows-10-sdk
+.. _fpm: https://fpm.readthedocs.io/en/latest/installing.html
