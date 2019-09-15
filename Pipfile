@@ -10,10 +10,9 @@ rope = "*"
 
 [packages]
 fbs = "*"
-pyinstaller = "==3.4"
 pynput = "*"
 pyside2 = "*"
-pypiwin32 =  { version = "*", os_name = "=='nt'" }
+# pypiwin32 =  { version = "*", sys_platform = "== 'win32'" }
 
 [requires]
-python_version = "3.6"
+python_version = "3.7"

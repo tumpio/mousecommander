@@ -5,8 +5,7 @@ import threading
 from queue import Queue
 from typing import Any, Callable
 
-from docutils.nodes import description
-from fbs_runtime.application_context import ApplicationContext, cached_property
+from fbs_runtime.application_context.PySide2 import ApplicationContext, cached_property
 from pynput.mouse import Button, Listener
 from PySide2.QtCore import Qt, QThread, Signal
 from PySide2.QtGui import QIcon
