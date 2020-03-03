@@ -16,10 +16,12 @@ browser.runtime.onMessage.addListener(request => {
 /**
  * Prevent page zoom on mouse down + wheel commands.
  */
-window.addEventListener("wheel", function (e) {
-    if (e.buttons !== 0) {
-        prevent(e);
-    }
+window.addEventListener("mousedown", function (e) {
+    window.addEventListener("wheel", preventOnButtonsDown, false);
+}, false);
+
+window.addEventListener("mouseup", function (e) {
+    window.removeEventListener("wheel", preventOnButtonsDown, false);
 }, false);
 
 /**
@@ -34,6 +36,12 @@ window.addEventListener("auxclick", function (e) {
 browser.runtime.connect({
     "name": "content"
 });
+
+function preventOnButtonsDown(e) {
+    if (e.buttons !== 0) {
+        prevent(e);
+    }
+}
 
 function prevent(event) {
     event.preventDefault();
