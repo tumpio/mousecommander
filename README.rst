@@ -1,4 +1,4 @@
-Mouse Commander Native - A Firefox extension
+Mouse Commander - A Firefox extension
 ============================================
 
 A Firefox extension to map mouse button events or a sequence of events
