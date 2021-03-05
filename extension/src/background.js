@@ -17,23 +17,13 @@ let sequenceBinder = new SequenceBinder();
 let longPressTimer = {
     [PrimaryButton]: null,
     [MiddleButton]: null,
-    [SecondaryButton]: null
+    [SecondaryButton]: null,
 };
 let windowNoFocusTimer = null;
 let noFocusTimeout = 60 * 1000;
 
 browser.storage.local.get().then(init);
 browser.storage.onChanged.addListener(initChangedOptions);
-
-browser.windows.onFocusChanged.addListener((windowId) => {
-    clearTimeout(windowNoFocusTimer);
-    noFocus = windowId === browser.windows.WINDOW_ID_NONE;
-    if (noFocus) {
-        windowNoFocusTimer = setTimeout(disconnectClient, noFocusTimeout);
-    } else if (!clientPort) {
-        startClientConnection();
-    }
-});
 
 browser.runtime.onConnect.addListener((port) => {
     if (port.name === "event" || port.name === "sequence") {
@@ -49,11 +39,11 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
         if (clientPort && clientPort.error) {
             sendResponse({
                 connected: false,
-                error: clientPort.error.message
+                error: clientPort.error.message,
             });
         } else {
             sendResponse({
-                connected: clientPort !== null
+                connected: clientPort !== null,
             });
         }
     }
@@ -65,6 +55,7 @@ function init(options) {
     initEvents(options["events"]);
     initSequences(options["sequences"]);
     startClientConnection();
+    addWidowFocusListener();
 }
 
 function initChangedOptions(change) {
@@ -112,6 +103,18 @@ function initSequences(sequences) {
     }
 }
 
+function addWidowFocusListener() {
+    browser.windows.onFocusChanged.addListener((windowId) => {
+        clearTimeout(windowNoFocusTimer);
+        noFocus = windowId === browser.windows.WINDOW_ID_NONE;
+        if (noFocus) {
+            windowNoFocusTimer = setTimeout(disconnectClient, noFocusTimeout);
+        } else if (!clientPort) {
+            startClientConnection();
+        }
+    });
+}
+
 function startClientConnection() {
     clientPort = browser.runtime.connectNative(CLIENT_NAME);
     clientPort.onDisconnect.addListener((port) => {
@@ -144,7 +147,7 @@ function onLongPress(button) {
     return () => {
         longPressTimer[button] = null;
         onMouseEvent(EventLongPress[button]);
-    }
+    };
 }
 
 function onMouseEvent(event) {
@@ -186,10 +189,7 @@ function updateButtonsDown(event) {
             resetContextMenuSkip();
         }
     } else if (event === EventMouseDown[button]) {
-        longPressTimer[button] = setTimeout(
-            onLongPress(button),
-            LONG_PRESS_DURATION
-        );
+        longPressTimer[button] = setTimeout(onLongPress(button), LONG_PRESS_DURATION);
         buttonsDown |= MouseButtonDown[button];
     } else if (event === EventLongPress[button]) {
         skipEvents.add(EventMouseUp[button]);
@@ -197,10 +197,7 @@ function updateButtonsDown(event) {
     for (let [k, v] of Object.entries(longPressTimer)) {
         if (v && k !== button) {
             clearTimeout(v);
-            longPressTimer[k] = setTimeout(
-                onLongPress(k),
-                LONG_PRESS_DURATION
-            );
+            longPressTimer[k] = setTimeout(onLongPress(k), LONG_PRESS_DURATION);
         }
     }
 }
@@ -222,8 +219,8 @@ function executeBinding(event) {
 function messageTestEvent(event) {
     let command = commandBindings.getCommand(event, buttonsDown);
     let message = {
-        "event": event,
-        "buttonsDown": buttonsDown
+        event: event,
+        buttonsDown: buttonsDown,
     };
     if (command) {
         message["command"] = command.name;
@@ -235,7 +232,7 @@ function messageTestSequence(event) {
     testSequence.push(event);
     let command = sequenceBinder.getCommand(event);
     let message = {
-        "sequence": testSequence
+        sequence: testSequence,
     };
     if (command) {
         message["command"] = command.name;
