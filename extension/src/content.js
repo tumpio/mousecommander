@@ -5,6 +5,10 @@
 /**
  * Prevent context menu on secondary mouse down commands.
  */
+function prevent(e) {
+    e.preventDefault();
+}
+
 browser.runtime.onMessage.addListener(request => {
     if (request.preventContextMenu) {
         window.addEventListener("contextmenu", prevent, { once: true }, false);
@@ -14,7 +18,7 @@ browser.runtime.onMessage.addListener(request => {
 });
 
 /**
- * Prevent page zoom/scroll on mouse down + wheel commands.
+ * Prevent page scroll on mouse down + wheel commands.
  */
 const wheelListenerOptions = { capture: true, passive: false };
 
