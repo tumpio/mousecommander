@@ -14,14 +14,22 @@ browser.runtime.onMessage.addListener(request => {
 });
 
 /**
- * Prevent page zoom on mouse down + wheel commands.
+ * Prevent page zoom/scroll on mouse down + wheel commands.
  */
-window.addEventListener("mousedown", function (e) {
-    window.addEventListener("wheel", preventOnButtonsDown, false);
+const wheelListenerOptions = { capture: true, passive: false };
+
+function preventOnButtonsDown(e) {
+    if (e.buttons !== 0) {
+        e.preventDefault();
+    }
+}
+
+window.addEventListener("mousedown", function () {
+    window.addEventListener("wheel", preventOnButtonsDown, wheelListenerOptions);
 }, false);
 
-window.addEventListener("mouseup", function (e) {
-    window.removeEventListener("wheel", preventOnButtonsDown, false);
+window.addEventListener("mouseup", function () {
+    window.removeEventListener("wheel", preventOnButtonsDown, wheelListenerOptions);
 }, false);
 
 /**
@@ -29,20 +37,10 @@ window.addEventListener("mouseup", function (e) {
  */
 window.addEventListener("auxclick", function (e) {
     if (e.button === 1 && e.buttons !== 0) {
-        prevent(e);
+        e.preventDefault();
     }
 }, false);
 
 browser.runtime.connect({
     "name": "content"
 });
-
-function preventOnButtonsDown(e) {
-    if (e.buttons !== 0) {
-        prevent(e);
-    }
-}
-
-function prevent(event) {
-    event.preventDefault();
-}
