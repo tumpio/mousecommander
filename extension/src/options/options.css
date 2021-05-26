@@ -1,3 +1,7 @@
+html {
+    height: 100%;
+}
+
 main {
     max-width: 980px;
     margin: auto;
